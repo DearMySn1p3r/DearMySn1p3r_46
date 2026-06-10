@@ -102,11 +102,11 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 .audio-row{display:flex;gap:8px;}
 .clip-meta{font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.35);font-family:monospace;text-align:center;}
 .answer-row{display:flex;gap:8px;width:100%;}
-#q-answer{flex:1;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.22);color:#fff;font-family:var(--font);font-weight:700;font-size:15px;letter-spacing:1px;padding:13px 14px;outline:none;transition:.2s;cursor:text !important;}
-#q-answer::placeholder{color:rgba(255,255,255,.22);font-weight:400;letter-spacing:0;}
-#q-answer:focus{border-color:rgba(255,255,255,.8);box-shadow:0 0 14px rgba(255,255,255,.18);}
-#q-answer.shake{animation:shake .35s;}
-#q-answer.ok{border-color:#fff;box-shadow:0 0 18px rgba(255,255,255,.5);}
+#q-answer,#l-answer{flex:1;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.22);color:#fff;font-family:var(--font);font-weight:700;font-size:15px;letter-spacing:1px;padding:13px 14px;outline:none;transition:.2s;cursor:text !important;}
+#q-answer::placeholder,#l-answer::placeholder{color:rgba(255,255,255,.22);font-weight:400;letter-spacing:0;}
+#q-answer:focus,#l-answer:focus{border-color:rgba(255,255,255,.8);box-shadow:0 0 14px rgba(255,255,255,.18);}
+#q-answer.shake,#l-answer.shake{animation:shake .35s;}
+#q-answer.ok,#l-answer.ok{border-color:#fff;box-shadow:0 0 18px rgba(255,255,255,.5);}
 .answer-row .btn{flex:0 0 120px;}
 .feedback{font-size:11px;letter-spacing:2px;text-align:center;min-height:18px;font-weight:700;}
 .feedback.ok{color:#fff;text-shadow:0 0 12px rgba(255,255,255,.6);}
@@ -183,7 +183,8 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 .lyrics-text{font-size:14px;line-height:2;letter-spacing:.3px;color:rgba(255,255,255,.92);white-space:pre-wrap;word-break:break-word;font-family:'Noto Sans KR',var(--font);}
 .lyrics-sec{color:rgba(255,255,255,.4);font-size:10px;letter-spacing:2px;}
 .lyrics-more{font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.35);text-align:center;margin-top:10px;}
-.reveal-thumb{width:92px;height:92px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.35);box-shadow:0 0 16px rgba(255,255,255,.18);margin-bottom:8px;}
+.reveal-thumb{width:92px;height:92px;border-radius:50%;overflow:hidden;border:1px solid rgba(255,255,255,.35);box-shadow:0 0 16px rgba(255,255,255,.18);margin-bottom:8px;}
+.reveal-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
 .l-reveal-wrap{display:flex;flex-direction:column;align-items:center;}
 
 /* KEY CONFIG MODAL */
@@ -199,6 +200,12 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 .kc-btn{font-family:var(--font);font-size:9px;letter-spacing:2px;font-weight:700;padding:8px 12px;background:transparent;border:1px solid rgba(255,255,255,.4);color:rgba(255,255,255,.85);transition:.2s;}
 .kc-btn:hover{background:#fff;color:#000;}
 .cfg-hint{font-size:8px;letter-spacing:2px;color:rgba(255,255,255,.35);text-align:center;}
+
+/* RHYTHM PAUSE OVERLAY */
+.pause-ov{position:absolute;inset:0;background:rgba(0,0,0,.84);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:5;backdrop-filter:blur(3px);}
+.pause-ov.on{display:flex;}
+.pause-title{font-size:28px;font-weight:900;letter-spacing:7px;text-shadow:0 0 22px rgba(255,255,255,.6);margin-bottom:6px;}
+.pause-ov .btn{max-width:210px;}
 
 @media(max-width:560px){header{padding:0 12px;}.hdr-title{font-size:15px;}.hdr-sub{display:none;}.title-big{font-size:24px;}.answer-row{flex-direction:column;}.answer-row .btn{flex:1;}.thumb-wrap{width:200px;height:200px;}#vol-slider{width:54px;}.hdr-right{font-size:9px;}}
 </style>
@@ -441,7 +448,14 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
   <!-- ════════ RHYTHM : GAME ════════ -->
   <div class="screen" id="r-game">
     <div class="game-top"><span class="song-nm" id="r-song">—</span><span>SCORE <span id="r-score" style="color:#fff;font-weight:900">0</span></span></div>
-    <div id="r-game-frame"><canvas id="r-canvas" width="460" height="620"></canvas></div>
+    <div id="r-game-frame"><canvas id="r-canvas" width="460" height="620"></canvas>
+      <div id="r-pause" class="pause-ov">
+        <div class="pause-title">PAUSED</div>
+        <button class="btn primary" onclick="rResume()"><span class="ico">▶</span> RESUME (ESC)</button>
+        <button class="btn ghost" onclick="rRetry()">↻ RETRY</button>
+        <button class="btn ghost" onclick="rQuit()">‹ QUIT</button>
+      </div>
+    </div>
     <div class="hp-wrap"><div class="hp-fill" id="r-hp"></div></div>
     <div class="song-prog"><div class="song-prog-fill" id="r-prog"></div></div>
     <button class="btn ghost" style="max-width:460px;margin-top:6px;" onclick="rQuit()">[ QUIT ]</button>
@@ -482,6 +496,10 @@ const CONFIG = {
 // 오디오/썸네일 파일명 = 캐릭터 이름(아래 thumb 값)
 const audioUrl = s => CONFIG.AUDIO_BASE + encodeURIComponent(s.thumb) + '.mp3';
 const thumbUrl = s => CONFIG.THUMB_BASE + encodeURIComponent(s.thumb) + CONFIG.THUMB_EXT;
+// 원형 썸네일 확대 배율 (원본에 검은 여백 있는 캐릭터는 더 확대). 기본 1.12
+const THUMB_ZOOM={ SANTA:1.5, ICARUS:1.5 };
+function thumbZoom(t){ return THUMB_ZOOM[t]||1.12; }
+function coverRect(img, zoom){ const iw=img.naturalWidth, ih=img.naturalHeight, side=Math.min(iw,ih)/(zoom||1); return {sx:(iw-side)/2, sy:(ih-side)/2, side}; }
 
 const SONGS = [
   { title:'가까이 오지 말라고 말했잖아!', char:'Ash',       thumb:'ASH',      aliases:['애쉬','애시'] },
@@ -674,6 +692,7 @@ function qReveal(correct){
   const img=document.getElementById('q-thumb-img'), fb=document.getElementById('q-fallback');
   img.onload=()=>{img.classList.add('on');fb.classList.remove('on');};
   img.onerror=()=>{img.classList.remove('on');document.getElementById('q-tf-initial').textContent=qSong.char[0].toUpperCase();document.getElementById('q-tf-name').textContent=qSong.thumb;fb.classList.add('on');};
+  img.style.transform='scale('+thumbZoom(qSong.thumb)+')';
   img.src=thumbUrl(qSong);
   document.getElementById('q-reveal').innerHTML='<div class="ri-title">'+escapeHtml(qSong.title)+'</div><div class="ri-char">★ '+escapeHtml(qSong.char.toUpperCase())+'</div>';
   document.getElementById('q-score').textContent=qScore;
@@ -715,7 +734,12 @@ function lLoadRound(){
   lSong=SONGS[lOrder[lIdx]];
   lSolved=false; lAttempts=0; lHintUsed=0; lBase=100;
   const raw=(typeof LYRICS!=='undefined' && LYRICS[lSong.thumb]) ? LYRICS[lSong.thumb] : '(가사 없음)';
-  lLines=raw.split('\n');
+  const isSec=ln=>{ const t=ln.trim(); return t!=='' && /^[\[【(].*[\]】)]$/.test(t); };
+  let arr=raw.split('\n').filter(ln=>!isSec(ln));
+  const clean=[];
+  for(const ln of arr){ if(ln.trim()===''){ if(clean.length===0||clean[clean.length-1]==='') continue; clean.push(''); } else clean.push(ln); }
+  while(clean.length&&clean[clean.length-1]==='') clean.pop();
+  lLines=clean.length?clean:['(가사 없음)'];
   lShown=Math.min(lLines.length, lStartLines);
   document.getElementById('l-round').textContent=(lIdx+1)+'/'+lRoundCount;
   document.getElementById('l-score').textContent=lScore;
@@ -772,9 +796,9 @@ function lGiveUp(){ if(lSolved)return; lSolved=true; lStreak=0; const fb=documen
 function lReveal(correct){
   lResults.push({song:lSong,correct});
   lShown=lLines.length; lRenderLyrics();
-  const url=thumbUrl(lSong);
+  const url=thumbUrl(lSong); const lz=thumbZoom(lSong.thumb);
   document.getElementById('l-reveal').innerHTML=
-    '<img class="reveal-thumb" src="'+url.replace(/"/g,'&quot;')+'" onerror="this.style.display=\'none\'">'+
+    '<div class="reveal-thumb"><img src="'+url.replace(/"/g,'&quot;')+'" style="transform:scale('+lz+')" onerror="this.parentNode.style.display=\'none\'"></div>'+
     '<div class="ri-title">'+escapeHtml(lSong.title)+'</div>'+
     '<div class="ri-char">★ '+escapeHtml(lSong.char.toUpperCase())+'</div>';
   document.getElementById('l-score').textContent=lScore;
@@ -812,7 +836,7 @@ let rSelected=null, rDiff='normal';
 let actx=null, audioBuf=null, source=null, analyser=null, freqData=null, rGain=null;
 let rThumbImg=null, rThumbReady=false;
 let notes=[], headIdx=0, startTime=0, songDur=0;
-let rRunning=false, rActive=false, rRaf=null;
+let rRunning=false, rActive=false, rRaf=null, rPaused=false, pausedPos=0;
 let rScore=0, combo=0, maxCombo=0, hp=100, cPerfect=0, cGood=0, cMiss=0;
 const laneFlash=[0,0,0,0,0]; let judgeText='', judgeT=0;
 
@@ -851,7 +875,7 @@ function buildBeatmap(buffer,diff){
   return out;
 }
 
-function rStopAll(){ rRunning=false; rActive=false; analyser=null; cancelAnimationFrame(rRaf); try{ if(source)source.stop(); }catch(e){} }
+function rStopAll(){ rRunning=false; rActive=false; rPaused=false; analyser=null; cancelAnimationFrame(rRaf); var po=document.getElementById('r-pause'); if(po)po.classList.remove('on'); try{ if(source)source.stop(); }catch(e){} }
 
 async function rStart(){
   if(rSelected===null) return;
@@ -877,7 +901,7 @@ async function rStart(){
 function rReset(){ headIdx=0; rScore=0; combo=0; maxCombo=0; hp=100; cPerfect=0; cGood=0; cMiss=0; judgeText=''; judgeT=0; for(let i=0;i<LANES;i++)laneFlash[i]=0; notes.forEach(n=>n.hit=false); }
 let cdVal=3;
 function rCountdown(song){
-  rReset(); analyser=null;
+  rReset(); analyser=null; rPaused=false; document.getElementById('r-pause').classList.remove('on');
   document.getElementById('r-song').textContent=song.title;
   document.getElementById('r-score').textContent='0';
   document.getElementById('r-hp').style.width='100%';
@@ -891,7 +915,8 @@ function rBegin(){ source=actx.createBufferSource(); source.buffer=audioBuf;
   analyser=actx.createAnalyser(); analyser.fftSize=128; freqData=new Uint8Array(analyser.frequencyBinCount);
   rGain=actx.createGain(); rGain.gain.value=volume;
   source.connect(analyser); analyser.connect(rGain); rGain.connect(actx.destination);
-  startTime=actx.currentTime+0.08; source.start(startTime); rRunning=true; rRaf=requestAnimationFrame(rLoop); }
+  const lead = DIFF[rDiff].travel + 1.4;   // 시작 후 노트가 위에서부터 내려올 여유 + 음악은 살짝 뒤에 시작
+  startTime=actx.currentTime+lead; source.start(startTime); rRunning=true; rPaused=false; rRaf=requestAnimationFrame(rLoop); }
 function rPos(){ return actx.currentTime-startTime-(actx.outputLatency||actx.baseLatency||0); }
 
 const rcanvas=document.getElementById('r-canvas'); const rctx=rcanvas.getContext('2d');
@@ -923,8 +948,8 @@ function rDrawBackground(){
     rctx.save();
     rctx.beginPath(); rctx.arc(cx,cy,R,0,Math.PI*2); rctx.closePath(); rctx.clip();
     rctx.globalAlpha=0.30;
-    const iw=rThumbImg.naturalWidth, ih=rThumbImg.naturalHeight, side=Math.min(iw,ih), sx=(iw-side)/2, sy=(ih-side)/2;
-    rctx.drawImage(rThumbImg, sx,sy,side,side, cx-R,cy-R, R*2,R*2);
+    const cr=coverRect(rThumbImg, thumbZoom(SONGS[rSelected]&&SONGS[rSelected].thumb));
+    rctx.drawImage(rThumbImg, cr.sx,cr.sy,cr.side,cr.side, cx-R,cy-R, R*2,R*2);
     rctx.restore();
     rctx.strokeStyle='rgba(255,255,255,.28)'; rctx.lineWidth=2*dpr;
     rctx.beginPath(); rctx.arc(cx,cy,R,0,Math.PI*2); rctx.stroke();
@@ -962,7 +987,7 @@ function rLoop(){
   const pos=rPos(), travel=DIFF[rDiff].travel;
   while(headIdx<notes.length && notes[headIdx].time<pos-W_MISS){ if(!notes[headIdx].hit) rMiss(); headIdx++; }
   rDrawField(); rDrawNotes(pos,travel); rDrawOverlay();
-  document.getElementById('r-prog').style.width=Math.min(100,(pos/songDur)*100)+'%';
+  document.getElementById('r-prog').style.width=Math.min(100,Math.max(0,(pos/songDur)*100))+'%';
   document.getElementById('r-hp').style.width=hp+'%';
   document.getElementById('r-score').textContent=rScore;
   if(pos>=songDur+0.3 || (headIdx>=notes.length&&pos>0.5)){ rEnd(true); return; }
@@ -983,7 +1008,8 @@ function rMiss(){ cMiss++; combo=0; hp=Math.max(0,hp-2.5); judgeText='MISS'; jud
 const keyDown=[false,false,false,false,false];
 window.addEventListener('keydown',e=>{
   if(rebindLane!==null){ e.preventDefault(); applyRebind(e.key); return; }
-  const lane=laneForKey(e.key); if(lane===undefined)return; if(!rActive)return; e.preventDefault(); if(!e.repeat){ keyDown[lane]=true; if(rRunning) rJudge(lane); }
+  if(e.key==='Escape' && (rRunning||rPaused)){ e.preventDefault(); rTogglePause(); return; }
+  const lane=laneForKey(e.key); if(lane===undefined)return; if(!rActive)return; e.preventDefault(); if(!e.repeat){ keyDown[lane]=true; if(rRunning&&!rPaused) rJudge(lane); }
 });
 window.addEventListener('keyup',e=>{ const lane=laneForKey(e.key); if(lane===undefined)return; if(!rActive)return; e.preventDefault(); keyDown[lane]=false; });
 rcanvas.addEventListener('touchstart',e=>{ if(!rRunning)return; e.preventDefault(); const r=rcanvas.getBoundingClientRect();
@@ -1005,8 +1031,17 @@ function rEnd(cleared){
   document.getElementById('hdr-mode').textContent='RESULT';
   show('r-result');
 }
-function rRetry(){ if(rSelected!==null&&audioBuf){ rCountdown(SONGS[rSelected]); } }
-function rQuit(){ rStopAll(); document.getElementById('hdr-mode').textContent='RHYTHM'; show('r-select'); }
+function rRetry(){ document.getElementById('r-pause').classList.remove('on'); if(rSelected!==null&&audioBuf){ rCountdown(SONGS[rSelected]); } }
+function rQuit(){ rStopAll(); document.getElementById('r-pause').classList.remove('on'); document.getElementById('hdr-mode').textContent='RHYTHM'; show('r-select'); }
+
+// ── PAUSE (ESC) ──
+function rTogglePause(){ if(rPaused) rResume(); else rPause(); }
+function rPause(){ if(!rRunning||rPaused) return; rPaused=true; pausedPos=Math.max(0,rPos()); try{ if(source)source.stop(); }catch(e){} cancelAnimationFrame(rRaf); document.getElementById('r-pause').classList.add('on'); document.getElementById('hdr-mode').textContent='PAUSED'; }
+function rResume(){ if(!rPaused) return; rPaused=false; document.getElementById('r-pause').classList.remove('on'); document.getElementById('hdr-mode').textContent=rDiff.toUpperCase();
+  source=actx.createBufferSource(); source.buffer=audioBuf; source.connect(analyser);
+  const lead=0.3, T=actx.currentTime+lead; startTime=T-pausedPos; source.start(T, pausedPos);
+  rRaf=requestAnimationFrame(rLoop);
+}
 
 // ── KEY CONFIG ──
 function rRenderKeyGuide(){
@@ -1073,8 +1108,8 @@ function rCaptureResult(){
   const song=SONGS[rSelected]; const cyT=330,R=150;
   if(rThumbReady && rThumbImg && rThumbImg.naturalWidth){
     cap.save(); cap.beginPath(); cap.arc(cx,cyT,R,0,Math.PI*2); cap.clip();
-    const iw=rThumbImg.naturalWidth,ih=rThumbImg.naturalHeight,side=Math.min(iw,ih),sx=(iw-side)/2,sy=(ih-side)/2;
-    cap.drawImage(rThumbImg,sx,sy,side,side,cx-R,cyT-R,R*2,R*2); cap.restore();
+    const cr=coverRect(rThumbImg, thumbZoom(song.thumb));
+    cap.drawImage(rThumbImg,cr.sx,cr.sy,cr.side,cr.side,cx-R,cyT-R,R*2,R*2); cap.restore();
     cap.strokeStyle='rgba(255,255,255,.4)'; cap.lineWidth=2; cap.beginPath(); cap.arc(cx,cyT,R,0,Math.PI*2); cap.stroke();
   } else {
     cap.strokeStyle='rgba(255,255,255,.2)'; cap.lineWidth=2; cap.beginPath(); cap.arc(cx,cyT,R,0,Math.PI*2); cap.stroke();
