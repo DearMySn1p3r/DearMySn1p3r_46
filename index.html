@@ -145,6 +145,23 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 
 #notif{position:fixed;bottom:22px;right:22px;background:rgba(255,255,255,.95);color:#000;padding:11px 18px;font-size:10px;font-weight:900;letter-spacing:1px;display:none;z-index:11000;border-left:4px solid #000;max-width:340px;box-shadow:0 8px 28px rgba(255,255,255,.15);}
 
+/* CAPTURE / SHARE */
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:49999;transition:opacity .08s ease;}
+#flash.on{opacity:.6;}
+#share-modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:20px;}
+#share-modal.on{display:flex;}
+.share-box{border:1px solid rgba(255,255,255,.5);background:#000;padding:28px;display:flex;flex-direction:column;align-items:center;gap:16px;max-width:420px;width:100%;box-shadow:0 0 50px rgba(255,255,255,.08);position:relative;}
+.share-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#fff,transparent);}
+.share-modal-label{font-size:9px;letter-spacing:4px;color:rgba(255,255,255,.5);text-align:center;}
+.share-modal-title{font-size:15px;font-weight:900;letter-spacing:3px;text-shadow:0 0 15px rgba(255,255,255,.6);text-align:center;}
+#share-preview{width:74%;border:1px solid rgba(255,255,255,.2);box-shadow:0 0 20px rgba(255,255,255,.06);border-radius:2px;}
+.share-btns{display:flex;gap:10px;width:100%;}
+.share-btn{flex:1;padding:11px 0;background:transparent;border:1px solid rgba(255,255,255,.4);color:rgba(255,255,255,.8);font-family:var(--font);font-size:9px;letter-spacing:3px;font-weight:700;transition:.2s;}
+.share-btn.primary{border-color:#fff;color:#fff;box-shadow:0 0 12px rgba(255,255,255,.15);}
+.share-btn:hover{background:#fff;color:#000;box-shadow:0 0 20px #fff;}
+.share-close{font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.3);border:none;background:transparent;font-family:var(--font);transition:color .2s;padding:4px 12px;}
+.share-close:hover{color:#fff;}
+
 @media(max-width:560px){header{padding:0 15px;}.hdr-title{font-size:15px;}.hdr-sub{display:none;}.title-big{font-size:24px;}.answer-row{flex-direction:column;}.answer-row .btn{flex:1;}.thumb-wrap{width:200px;height:200px;}}
 </style>
 </head>
@@ -152,7 +169,21 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 <div id="cursor"></div>
 <div class="scanline"></div>
 <div id="notif"></div>
+<div id="flash"></div>
 <audio id="q-audio" preload="none"></audio>
+<canvas id="cap-canvas" width="960" height="1240" style="display:none;"></canvas>
+<div id="share-modal">
+  <div class="share-box">
+    <div class="share-modal-label">RESULT CAPTURED</div>
+    <div class="share-modal-title" id="share-title">「ARCH」 RESULT</div>
+    <img id="share-preview" src="" alt="capture">
+    <div class="share-btns">
+      <button class="share-btn primary" onclick="downloadCapture()">[ DOWNLOAD ]</button>
+      <button class="share-btn" onclick="shareCapture()" id="share-native-btn">[ SHARE ]</button>
+    </div>
+    <button class="share-close" onclick="closeShareModal()">[ CLOSE ]</button>
+  </div>
+</div>
 
 <header>
   <div class="hdr-left" onclick="goHome()"><div class="hdr-title">「ARCH」</div><div class="hdr-sub">| SOUND_SYSTEM</div></div>
@@ -248,6 +279,7 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
       <div class="res-sub" id="q-res-sub">0 / 0 정답</div>
     </div>
     <div class="res-list" id="q-res-list"></div>
+    <button class="btn primary" onclick="qCaptureResult()"><span class="ico">⊡</span> CAPTURE_RESULT</button>
     <div style="display:flex;gap:8px;width:100%;">
       <button class="btn ghost" onclick="openQuiz()">↻ AGAIN</button>
       <button class="btn primary" onclick="goHome()">HOME ▶</button>
@@ -303,6 +335,7 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
       <div class="res-cell"><span class="rl">ACCURACY</span><span class="rv" id="r-acc">0%</span></div>
       <div class="res-cell"><span class="rl">TRACK</span><span class="rv" id="r-track" style="font-size:9px;">—</span></div>
     </div>
+    <button class="btn primary" onclick="rCaptureResult()"><span class="ico">⊡</span> CAPTURE_RESULT</button>
     <div style="display:flex;gap:8px;width:100%;">
       <button class="btn ghost" onclick="rRetry()">↻ RETRY</button>
       <button class="btn primary" onclick="openRhythm()">SELECT ▶</button>
@@ -317,7 +350,8 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 // ═══════════════════════════════════════════════════════════
 const CONFIG = {
   AUDIO_BASE: 'https://riqhmxfnycmcgvxjllcj.supabase.co/storage/v1/object/public/songs/',
-  THUMB_BASE: 'https://riqhmxfnycmcgvxjllcj.supabase.co/storage/v1/object/public/thumbnails/',
+  // 캐릭터 이미지 = 깃허브 raw. 파일명 = 캐릭터이름.jpg (예: ASH.jpg). 저장소 루트 기준.
+  THUMB_BASE: 'https://raw.githubusercontent.com/DearMySn1p3r/DearMySn1p3r_46/main/',
   THUMB_EXT : '.jpg',
 };
 // 오디오/썸네일 파일명 = 캐릭터 이름(아래 thumb 값)
@@ -414,7 +448,7 @@ function qLoadRound(){
   document.getElementById('q-score').textContent=qScore;
   document.getElementById('q-streak').textContent=qStreak;
   document.getElementById('q-mystery').style.display='flex';
-  const img=document.getElementById('q-thumb-img'); img.classList.remove('on'); img.src='';
+  const img=document.getElementById('q-thumb-img'); img.onload=null; img.onerror=null; img.classList.remove('on'); img.removeAttribute('src');
   document.getElementById('q-fallback').classList.remove('on');
   document.getElementById('q-reveal').innerHTML='';
   const ans=document.getElementById('q-answer'); ans.value=''; ans.disabled=false; ans.classList.remove('ok'); ans.focus();
@@ -500,14 +534,15 @@ document.getElementById('q-answer').addEventListener('keydown',e=>{ if(e.key==='
 // ═══════════════════════════════════════════════════════════
 //  RHYTHM
 // ═══════════════════════════════════════════════════════════
-const DIFF={ easy:{minGap:0.34,k:1.9,travel:1.75}, normal:{minGap:0.20,k:1.5,travel:1.40}, hard:{minGap:0.12,k:1.3,travel:1.05} };
+const DIFF={ easy:{minGap:0.50,k:2.3,travel:2.10}, normal:{minGap:0.34,k:1.9,travel:1.70}, hard:{minGap:0.22,k:1.5,travel:1.35} };
 const LANES=5;
 const KEY_TO_LANE={'ArrowLeft':0,'ArrowDown':1,' ':2,'Spacebar':2,'ArrowUp':3,'ArrowRight':4};
 const LANE_SYM=['◄','▼','▮','▲','►'];
-const W_PERFECT=0.045, W_GOOD=0.11, W_MISS=0.16;
+const W_PERFECT=0.06, W_GOOD=0.15, W_MISS=0.20;
 
 let rSelected=null, rDiff='normal';
-let actx=null, audioBuf=null, source=null;
+let actx=null, audioBuf=null, source=null, analyser=null, freqData=null;
+let rThumbImg=null, rThumbReady=false;
 let notes=[], headIdx=0, startTime=0, songDur=0;
 let rRunning=false, rActive=false, rRaf=null;
 let rScore=0, combo=0, maxCombo=0, hp=100, cPerfect=0, cGood=0, cMiss=0;
@@ -548,12 +583,15 @@ function buildBeatmap(buffer,diff){
   return out;
 }
 
-function rStopAll(){ rRunning=false; rActive=false; cancelAnimationFrame(rRaf); try{ if(source)source.stop(); }catch(e){} }
+function rStopAll(){ rRunning=false; rActive=false; analyser=null; cancelAnimationFrame(rRaf); try{ if(source)source.stop(); }catch(e){} }
 
 async function rStart(){
   if(rSelected===null) return;
   rDiff=document.querySelector('#r-diff-grid .opt.sel').dataset.d;
   const song=SONGS[rSelected];
+  rThumbReady=false; rThumbImg=new Image(); rThumbImg.crossOrigin='anonymous';
+  rThumbImg.onload=()=>{ rThumbReady=true; }; rThumbImg.onerror=()=>{ rThumbReady=false; };
+  rThumbImg.src=thumbUrl(song);
   show('r-load'); document.getElementById('r-load-txt').textContent='LOADING AUDIO...';
   try{
     if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
@@ -571,7 +609,7 @@ async function rStart(){
 function rReset(){ headIdx=0; rScore=0; combo=0; maxCombo=0; hp=100; cPerfect=0; cGood=0; cMiss=0; judgeText=''; judgeT=0; for(let i=0;i<LANES;i++)laneFlash[i]=0; notes.forEach(n=>n.hit=false); }
 let cdVal=3;
 function rCountdown(song){
-  rReset();
+  rReset(); analyser=null;
   document.getElementById('r-song').textContent=song.title;
   document.getElementById('r-score').textContent='0';
   document.getElementById('r-hp').style.width='100%';
@@ -581,7 +619,10 @@ function rCountdown(song){
   const cd=setInterval(()=>{ cdVal--; if(cdVal>0){ judgeText=String(cdVal); judgeT=performance.now(); rDrawStatic(); } else { clearInterval(cd); judgeText='GO'; judgeT=performance.now(); rBegin(); } },800);
   rDrawStatic();
 }
-function rBegin(){ source=actx.createBufferSource(); source.buffer=audioBuf; source.connect(actx.destination); startTime=actx.currentTime+0.08; source.start(startTime); rRunning=true; rRaf=requestAnimationFrame(rLoop); }
+function rBegin(){ source=actx.createBufferSource(); source.buffer=audioBuf;
+  analyser=actx.createAnalyser(); analyser.fftSize=128; freqData=new Uint8Array(analyser.frequencyBinCount);
+  source.connect(analyser); analyser.connect(actx.destination);
+  startTime=actx.currentTime+0.08; source.start(startTime); rRunning=true; rRaf=requestAnimationFrame(rLoop); }
 function rPos(){ return actx.currentTime-startTime-(actx.outputLatency||actx.baseLatency||0); }
 
 const rcanvas=document.getElementById('r-canvas'); const rctx=rcanvas.getContext('2d');
@@ -589,8 +630,43 @@ let CW=460,CH=620,JUDGE_Y=0,LANE_W=0,dpr=1;
 function rSetupCanvas(){ dpr=Math.min(2,window.devicePixelRatio||1); const cssW=rcanvas.clientWidth||460, cssH=cssW*(620/460); rcanvas.width=Math.round(cssW*dpr); rcanvas.height=Math.round(cssH*dpr); CW=rcanvas.width; CH=rcanvas.height; LANE_W=CW/LANES; JUDGE_Y=CH*0.84; rctx.textAlign='center'; rctx.textBaseline='middle'; }
 window.addEventListener('resize',()=>{ if(document.getElementById('r-game').classList.contains('on')) rSetupCanvas(); });
 function rr(x,y,w,h,r){ rctx.beginPath(); rctx.moveTo(x+r,y); rctx.arcTo(x+w,y,x+w,y+h,r); rctx.arcTo(x+w,y+h,x,y+h,r); rctx.arcTo(x,y+h,x,y,r); rctx.arcTo(x,y,x+w,y,r); rctx.closePath(); }
+function rDrawBackground(){
+  const cx=CW/2, cy=CH*0.32, R=Math.min(CW,CH)*0.19;
+  // 음파 (circular spectrum, symmetric)
+  if(analyser && freqData){
+    analyser.getByteFrequencyData(freqData);
+    const n=freqData.length, total=n*2;
+    for(let i=0;i<total;i++){
+      const bin = i<n ? i : (total-1-i);
+      const v=freqData[bin]/255;
+      const ang=(i/total)*Math.PI*2 - Math.PI/2;
+      const r0=R*1.18, r1=r0 + v*R*1.0;
+      rctx.strokeStyle='rgba(255,255,255,'+(0.10+v*0.42)+')';
+      rctx.lineWidth=2*dpr;
+      rctx.beginPath();
+      rctx.moveTo(cx+Math.cos(ang)*r0, cy+Math.sin(ang)*r0);
+      rctx.lineTo(cx+Math.cos(ang)*r1, cy+Math.sin(ang)*r1);
+      rctx.stroke();
+    }
+  }
+  // 캐릭터 썸네일 (원형, 노트 뒤 배경)
+  if(rThumbReady && rThumbImg && rThumbImg.naturalWidth){
+    rctx.save();
+    rctx.beginPath(); rctx.arc(cx,cy,R,0,Math.PI*2); rctx.closePath(); rctx.clip();
+    rctx.globalAlpha=0.30;
+    const iw=rThumbImg.naturalWidth, ih=rThumbImg.naturalHeight, side=Math.min(iw,ih), sx=(iw-side)/2, sy=(ih-side)/2;
+    rctx.drawImage(rThumbImg, sx,sy,side,side, cx-R,cy-R, R*2,R*2);
+    rctx.restore();
+    rctx.strokeStyle='rgba(255,255,255,.28)'; rctx.lineWidth=2*dpr;
+    rctx.beginPath(); rctx.arc(cx,cy,R,0,Math.PI*2); rctx.stroke();
+  } else {
+    rctx.strokeStyle='rgba(255,255,255,.10)'; rctx.lineWidth=1*dpr;
+    rctx.beginPath(); rctx.arc(cx,cy,R,0,Math.PI*2); rctx.stroke();
+  }
+}
 function rDrawField(){
   rctx.clearRect(0,0,CW,CH);
+  rDrawBackground();
   rctx.strokeStyle='rgba(255,255,255,.08)'; rctx.lineWidth=1*dpr;
   for(let i=1;i<LANES;i++){ rctx.beginPath(); rctx.moveTo(i*LANE_W,0); rctx.lineTo(i*LANE_W,CH); rctx.stroke(); }
   for(let i=0;i<LANES;i++){ if(laneFlash[i]>0){ rctx.fillStyle='rgba(255,255,255,'+(0.12*laneFlash[i])+')'; rctx.fillRect(i*LANE_W,0,LANE_W,CH); laneFlash[i]-=0.08; if(laneFlash[i]<0)laneFlash[i]=0; } }
@@ -633,7 +709,7 @@ function rJudge(lane){
   else { cGood++; rScore+=120+combo*2; combo++; hp=Math.min(100,hp+0.3); judgeText='GOOD'; }
   if(combo>maxCombo)maxCombo=combo; judgeT=performance.now(); laneFlash[lane]=1;
 }
-function rMiss(){ cMiss++; combo=0; hp=Math.max(0,hp-4); judgeText='MISS'; judgeT=performance.now(); }
+function rMiss(){ cMiss++; combo=0; hp=Math.max(0,hp-2.5); judgeText='MISS'; judgeT=performance.now(); }
 
 const keyDown=[false,false,false,false,false];
 window.addEventListener('keydown',e=>{ const lane=KEY_TO_LANE[e.key]; if(lane===undefined)return; if(!rActive)return; e.preventDefault(); if(!e.repeat){ keyDown[lane]=true; if(rRunning) rJudge(lane); } });
@@ -659,6 +735,100 @@ function rEnd(cleared){
 }
 function rRetry(){ if(rSelected!==null&&audioBuf){ rCountdown(SONGS[rSelected]); } }
 function rQuit(){ rStopAll(); document.getElementById('hdr-mode').textContent='RHYTHM'; show('r-select'); }
+
+// ═══════════════════════════════════════════════════════════
+//  RESULT CAPTURE / SHARE
+// ═══════════════════════════════════════════════════════════
+const capCanvas=document.getElementById('cap-canvas'); const cap=capCanvas.getContext('2d');
+const CWp=capCanvas.width, CHp=capCanvas.height;
+let capturedDataURL=null, capName='ARCH_RESULT';
+
+function capFit(t,w,maxPx,minPx,maxW){ let s=maxPx; cap.font=w+' '+s+'px Orbitron, sans-serif'; while(cap.measureText(t).width>maxW && s>minPx){ s-=2; cap.font=w+' '+s+'px Orbitron, sans-serif'; } return s; }
+function capCorner(x,y,dx,dy,len){ cap.beginPath(); cap.moveTo(x+dx*len,y); cap.lineTo(x,y); cap.lineTo(x,y+dy*len); cap.stroke(); }
+function capHash(s){ let h=0x811c9dc5; for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=(h*0x01000193)>>>0;} return ('00000000'+h.toString(16).toUpperCase()).slice(-8); }
+function capFrame(sub){
+  const W=CWp,H=CHp;
+  cap.fillStyle='#000'; cap.fillRect(0,0,W,H);
+  const g=cap.createRadialGradient(W/2,H*0.4,20,W/2,H*0.4,560); g.addColorStop(0,'rgba(255,255,255,.06)'); g.addColorStop(1,'rgba(255,255,255,0)'); cap.fillStyle=g; cap.fillRect(0,0,W,H);
+  cap.fillStyle='rgba(255,255,255,.018)'; for(let y=0;y<H;y+=6) cap.fillRect(0,y,W,2);
+  cap.strokeStyle='rgba(255,255,255,.45)'; cap.lineWidth=2; cap.strokeRect(28,28,W-56,H-56);
+  const lg=cap.createLinearGradient(28,0,W-28,0); lg.addColorStop(0,'rgba(255,255,255,0)'); lg.addColorStop(.5,'rgba(255,255,255,.9)'); lg.addColorStop(1,'rgba(255,255,255,0)'); cap.fillStyle=lg; cap.fillRect(28,28,W-56,3);
+  cap.strokeStyle='rgba(255,255,255,.8)'; cap.lineWidth=2; const m=28,L=26; capCorner(m,m,1,1,L);capCorner(W-m,m,-1,1,L);capCorner(m,H-m,1,-1,L);capCorner(W-m,H-m,-1,-1,L);
+  cap.textBaseline='alphabetic'; cap.textAlign='left'; cap.fillStyle='rgba(255,255,255,.7)'; cap.font='700 20px Orbitron, sans-serif'; cap.fillText('「ARCH」 SOUND SYSTEM',56,92);
+  cap.textAlign='right'; cap.fillStyle='rgba(255,255,255,.4)'; cap.font='400 16px monospace'; cap.fillText(sub,W-56,92);
+  cap.strokeStyle='rgba(255,255,255,.22)'; cap.lineWidth=1; cap.beginPath(); cap.moveTo(56,116); cap.lineTo(W-56,116); cap.stroke();
+}
+function capFooter(idStr){
+  const W=CWp,H=CHp; const ts=new Date().toLocaleString('en-GB',{hour12:false}).replace(',','');
+  cap.strokeStyle='rgba(255,255,255,.22)'; cap.lineWidth=1; cap.beginPath(); cap.moveTo(56,H-150); cap.lineTo(W-56,H-150); cap.stroke();
+  cap.textAlign='left'; cap.fillStyle='rgba(255,255,255,.45)'; cap.font='400 15px monospace';
+  cap.fillText('ID:   '+capHash(idStr),56,H-110); cap.fillText('TIME: '+ts,56,H-84);
+  cap.textAlign='right'; cap.fillStyle='rgba(255,255,255,.7)'; cap.font='700 13px Orbitron, sans-serif'; cap.fillText('▣ ARCH SOUND SYSTEM',W-56,H-110);
+  cap.textAlign='center'; cap.fillStyle='rgba(255,255,255,.25)'; cap.font='700 11px Orbitron, sans-serif'; cap.fillText('「ARCH」 BONUS TRACK',W/2,H-52);
+}
+
+function rCaptureResult(){
+  const W=CWp,cx=W/2;
+  capFrame('RHYTHM // RESULT');
+  const rank=document.getElementById('r-rank').textContent;
+  const song=SONGS[rSelected]; const cyT=330,R=150;
+  if(rThumbReady && rThumbImg && rThumbImg.naturalWidth){
+    cap.save(); cap.beginPath(); cap.arc(cx,cyT,R,0,Math.PI*2); cap.clip();
+    const iw=rThumbImg.naturalWidth,ih=rThumbImg.naturalHeight,side=Math.min(iw,ih),sx=(iw-side)/2,sy=(ih-side)/2;
+    cap.drawImage(rThumbImg,sx,sy,side,side,cx-R,cyT-R,R*2,R*2); cap.restore();
+    cap.strokeStyle='rgba(255,255,255,.4)'; cap.lineWidth=2; cap.beginPath(); cap.arc(cx,cyT,R,0,Math.PI*2); cap.stroke();
+  } else {
+    cap.strokeStyle='rgba(255,255,255,.2)'; cap.lineWidth=2; cap.beginPath(); cap.arc(cx,cyT,R,0,Math.PI*2); cap.stroke();
+    cap.fillStyle='rgba(255,255,255,.5)'; cap.font='900 60px Orbitron, sans-serif'; cap.textAlign='center'; cap.textBaseline='middle'; cap.fillText(song.char[0].toUpperCase(),cx,cyT); cap.textBaseline='alphabetic';
+  }
+  cap.textAlign='center';
+  const ts2=capFit(song.title,'900',40,22,W-200); cap.font='900 '+ts2+'px Orbitron, sans-serif'; cap.fillStyle='#fff';
+  cap.shadowColor='rgba(255,255,255,.5)'; cap.shadowBlur=14; cap.fillText(song.title,cx,560); cap.shadowBlur=0;
+  cap.fillStyle='rgba(255,255,255,.55)'; cap.font='700 16px Orbitron, sans-serif'; cap.fillText('★ '+song.char.toUpperCase()+'   ·   '+rDiff.toUpperCase(),cx,592);
+  cap.fillStyle='rgba(255,255,255,.4)'; cap.font='700 14px Orbitron, sans-serif'; cap.fillText('R A N K',cx,648);
+  cap.fillStyle='#fff'; cap.font='900 120px Orbitron, sans-serif'; cap.shadowColor='rgba(255,255,255,.7)'; cap.shadowBlur=30; cap.fillText(rank,cx,760); cap.shadowBlur=0;
+  cap.fillStyle='rgba(255,255,255,.85)'; cap.font='900 38px Orbitron, sans-serif'; cap.fillText(document.getElementById('r-res-score').textContent+' PTS',cx,816);
+  const acc=document.getElementById('r-acc').textContent, mc=document.getElementById('r-maxcombo').textContent;
+  const p=document.getElementById('r-perfect').textContent, gd=document.getElementById('r-good').textContent, ms=document.getElementById('r-miss').textContent;
+  cap.fillStyle='rgba(255,255,255,.6)'; cap.font='400 18px monospace';
+  cap.fillText('ACC '+acc+'    ·    MAX COMBO '+mc,cx,878);
+  cap.fillText('PERFECT '+p+'    GOOD '+gd+'    MISS '+ms,cx,910);
+  capFooter('R|'+song.thumb+'|'+rank+'|'+document.getElementById('r-res-score').textContent);
+  capName='ARCH_RHYTHM_'+song.thumb+'_'+rank;
+  document.getElementById('share-title').textContent='「ARCH」 RHYTHM RESULT';
+  openShare();
+}
+
+function qCaptureResult(){
+  const W=CWp,cx=W/2;
+  capFrame('SOUND TEST // RESULT');
+  const hits=qResults.filter(r=>r.correct).length, cyT=350;
+  cap.strokeStyle='rgba(255,255,255,.18)'; cap.lineWidth=1; cap.beginPath(); cap.arc(cx,cyT,165,0,Math.PI*2); cap.stroke();
+  const rg=cap.createRadialGradient(cx,cyT,20,cx,cyT,200); rg.addColorStop(0,'rgba(255,255,255,.06)'); rg.addColorStop(1,'rgba(255,255,255,0)'); cap.fillStyle=rg; cap.beginPath(); cap.arc(cx,cyT,200,0,Math.PI*2); cap.fill();
+  cap.fillStyle='rgba(255,255,255,.5)'; cap.font='900 76px Orbitron, sans-serif'; cap.textAlign='center'; cap.textBaseline='middle'; cap.shadowColor='rgba(255,255,255,.4)'; cap.shadowBlur=18; cap.fillText('♪',cx,cyT); cap.shadowBlur=0; cap.textBaseline='alphabetic';
+  cap.textAlign='center'; cap.fillStyle='rgba(255,255,255,.4)'; cap.font='700 15px Orbitron, sans-serif'; cap.fillText('F I N A L   S C O R E',cx,628);
+  cap.fillStyle='#fff'; cap.font='900 96px Orbitron, sans-serif'; cap.shadowColor='rgba(255,255,255,.6)'; cap.shadowBlur=28; cap.fillText(qScore.toLocaleString(),cx,724); cap.shadowBlur=0;
+  cap.strokeStyle='rgba(255,255,255,.18)'; cap.lineWidth=1; cap.beginPath(); cap.moveTo(140,776); cap.lineTo(W-140,776); cap.stroke();
+  const acc=Math.round((hits/(qRoundCount||1))*100);
+  cap.fillStyle='#fff'; cap.font='900 56px Orbitron, sans-serif'; cap.fillText(hits+' / '+qRoundCount,cx,856);
+  cap.fillStyle='rgba(255,255,255,.4)'; cap.font='700 15px Orbitron, sans-serif'; cap.fillText('C O R R E C T   ·   '+acc+'%',cx,892);
+  capFooter('Q|'+qScore+'|'+hits+'/'+qRoundCount);
+  capName='ARCH_QUIZ_'+qScore;
+  document.getElementById('share-title').textContent='「ARCH」 SOUND TEST RESULT';
+  openShare();
+}
+
+function openShare(){
+  const flash=document.getElementById('flash'); flash.classList.add('on'); setTimeout(()=>flash.classList.remove('on'),120);
+  try{ capturedDataURL=capCanvas.toDataURL('image/png'); }catch(e){ notify('캡쳐 실패: 이미지 CORS'); return; }
+  document.getElementById('share-preview').src=capturedDataURL;
+  document.getElementById('share-native-btn').style.display=navigator.share?'':'none';
+  document.getElementById('share-modal').classList.add('on');
+}
+function downloadCapture(){ if(!capturedDataURL)return; const a=document.createElement('a'); a.href=capturedDataURL; a.download=capName+'.png'; a.click(); notify('IMAGE_SAVED'); closeShareModal(); }
+async function shareCapture(){ if(!capturedDataURL||!navigator.share)return; try{ const blob=await(await fetch(capturedDataURL)).blob(); const file=new File([blob],capName+'.png',{type:'image/png'}); await navigator.share({title:'「ARCH」 SOUND SYSTEM',files:[file]}); }catch(e){} closeShareModal(); }
+function closeShareModal(){ document.getElementById('share-modal').classList.remove('on'); }
+document.getElementById('share-modal').addEventListener('click',function(e){ if(e.target===this) closeShareModal(); });
 
 // ── CURSOR / CLOCK ──
 const cursorEl=document.getElementById('cursor');
