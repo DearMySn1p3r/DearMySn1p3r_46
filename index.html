@@ -31,6 +31,12 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 .hdr-sub{font-size:10px;letter-spacing:5px;color:var(--dim);}
 .hdr-right{font-size:10px;color:rgba(255,255,255,.5);font-family:monospace;letter-spacing:2px;text-align:right;line-height:1.7;}
 .hdr-right span{color:#fff;}
+.vol-ctrl{display:flex;align-items:center;gap:8px;}
+.vol-ico{font-size:14px;color:rgba(255,255,255,.7);}
+@media(pointer:coarse){.vol-ico,#vol-slider{cursor:pointer !important;}}
+#vol-slider{-webkit-appearance:none;appearance:none;width:84px;height:3px;background:rgba(255,255,255,.25);outline:none;}
+#vol-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:12px;height:12px;border-radius:50%;background:#fff;box-shadow:0 0 8px rgba(255,255,255,.6);}
+#vol-slider::-moz-range-thumb{width:12px;height:12px;border:none;border-radius:50%;background:#fff;box-shadow:0 0 8px rgba(255,255,255,.6);}
 
 #app{margin-top:58px;min-height:calc(100vh - 58px);display:flex;align-items:center;justify-content:center;padding:24px 16px 50px;}
 .screen{display:none;width:100%;max-width:560px;flex-direction:column;align-items:center;gap:16px;}
@@ -162,7 +168,7 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 .share-close{font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.3);border:none;background:transparent;font-family:var(--font);transition:color .2s;padding:4px 12px;}
 .share-close:hover{color:#fff;}
 
-@media(max-width:560px){header{padding:0 15px;}.hdr-title{font-size:15px;}.hdr-sub{display:none;}.title-big{font-size:24px;}.answer-row{flex-direction:column;}.answer-row .btn{flex:1;}.thumb-wrap{width:200px;height:200px;}}
+@media(max-width:560px){header{padding:0 12px;}.hdr-title{font-size:15px;}.hdr-sub{display:none;}.title-big{font-size:24px;}.answer-row{flex-direction:column;}.answer-row .btn{flex:1;}.thumb-wrap{width:200px;height:200px;}#vol-slider{width:54px;}.hdr-right{font-size:9px;}}
 </style>
 </head>
 <body>
@@ -187,6 +193,10 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 
 <header>
   <div class="hdr-left" onclick="goHome()"><div class="hdr-title">「ARCH」</div><div class="hdr-sub">| SOUND_SYSTEM</div></div>
+  <div class="vol-ctrl">
+    <span class="vol-ico" id="vol-ico" onclick="toggleMute()">🔊</span>
+    <input type="range" id="vol-slider" min="0" max="100" value="80" aria-label="volume">
+  </div>
   <div class="hdr-right">MODE: <span id="hdr-mode">HOME</span><br><span id="clock">00:00:00</span> KST</div>
 </header>
 
@@ -395,6 +405,13 @@ let notifTimer;
 function notify(m){ const el=document.getElementById('notif'); el.textContent='>> '+m; el.style.display='block'; el.style.animation='none'; void el.offsetWidth; el.style.animation='notifIn .3s forwards'; clearTimeout(notifTimer); notifTimer=setTimeout(()=>el.style.display='none',3000); }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 
+// ── VOLUME (퀴즈 + 리듬 공통) ──
+let volume=0.8, lastVol=0.8;
+try{ const sv=localStorage.getItem('arch_vol'); if(sv!==null) volume=Math.min(1,Math.max(0,parseFloat(sv))); }catch(e){}
+function applyVolume(){ try{ document.getElementById('q-audio').volume=volume; }catch(e){} if(rGain) rGain.gain.value=volume; const ico=document.getElementById('vol-ico'); if(ico) ico.textContent=volume<=0?'🔇':(volume<0.5?'🔈':'🔊'); }
+function setVolume(v){ volume=Math.min(1,Math.max(0,v)); if(volume>0) lastVol=volume; try{ localStorage.setItem('arch_vol',volume); }catch(e){} const sl=document.getElementById('vol-slider'); if(sl) sl.value=Math.round(volume*100); applyVolume(); }
+function toggleMute(){ if(volume>0){ lastVol=volume; setVolume(0); } else { setVolume(lastVol||0.8); } }
+
 // ── NAV ──
 function goHome(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='HOME'; show('screen-home'); }
 function openQuiz(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='QUIZ'; show('q-start'); }
@@ -541,7 +558,7 @@ const LANE_SYM=['◄','▼','▮','▲','►'];
 const W_PERFECT=0.06, W_GOOD=0.15, W_MISS=0.20;
 
 let rSelected=null, rDiff='normal';
-let actx=null, audioBuf=null, source=null, analyser=null, freqData=null;
+let actx=null, audioBuf=null, source=null, analyser=null, freqData=null, rGain=null;
 let rThumbImg=null, rThumbReady=false;
 let notes=[], headIdx=0, startTime=0, songDur=0;
 let rRunning=false, rActive=false, rRaf=null;
@@ -621,7 +638,8 @@ function rCountdown(song){
 }
 function rBegin(){ source=actx.createBufferSource(); source.buffer=audioBuf;
   analyser=actx.createAnalyser(); analyser.fftSize=128; freqData=new Uint8Array(analyser.frequencyBinCount);
-  source.connect(analyser); analyser.connect(actx.destination);
+  rGain=actx.createGain(); rGain.gain.value=volume;
+  source.connect(analyser); analyser.connect(rGain); rGain.connect(actx.destination);
   startTime=actx.currentTime+0.08; source.start(startTime); rRunning=true; rRaf=requestAnimationFrame(rLoop); }
 function rPos(){ return actx.currentTime-startTime-(actx.outputLatency||actx.baseLatency||0); }
 
@@ -837,7 +855,8 @@ document.addEventListener('mousedown',()=>cursorEl.classList.add('click'));
 document.addEventListener('mouseup',()=>cursorEl.classList.remove('click'));
 setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocaleTimeString('en-GB');},1000);
 
-window.onload=async()=>{ if(document.fonts&&document.fonts.ready)await document.fonts.ready; notify('SOUND SYSTEM ONLINE · '+SONGS.length+' TRACKS'); };
+document.getElementById('vol-slider').addEventListener('input',e=>setVolume(parseInt(e.target.value,10)/100));
+window.onload=async()=>{ if(document.fonts&&document.fonts.ready)await document.fonts.ready; setVolume(volume); notify('SOUND SYSTEM ONLINE · '+SONGS.length+' TRACKS'); };
 </script>
 </body>
 </html>
