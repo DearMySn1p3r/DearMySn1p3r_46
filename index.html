@@ -124,6 +124,9 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 .res-sub{font-size:10px;letter-spacing:4px;color:rgba(255,255,255,.5);text-align:center;}
 
 /* RHYTHM */
+.r-search{width:100%;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.22);color:#fff;font-family:var(--font);font-size:13px;letter-spacing:1px;padding:10px 12px;outline:none;margin-bottom:10px;transition:.2s;cursor:text !important;}
+.r-search::placeholder{color:rgba(255,255,255,.25);letter-spacing:0;}
+.r-search:focus{border-color:rgba(255,255,255,.7);box-shadow:0 0 12px rgba(255,255,255,.15);}
 .song-list{width:100%;max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:4px;}
 .song-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.015);transition:.18s;}
 .song-item:hover{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.05);}
@@ -425,7 +428,9 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
     <div class="keyguide" id="r-keyguide"><span><b>←</b><b>↓</b><b>SPACE</b><b>↑</b><b>→</b></span></div>
     <div class="box">
       <div class="label">SELECT TRACK</div>
+      <input id="r-search" class="r-search" type="text" placeholder="🔍 곡 제목 · 캐릭터 검색..." autocomplete="off">
       <div class="song-list" id="r-song-list"></div>
+      <div class="lyrics-more" id="r-noresult" style="display:none;">검색 결과 없음</div>
     </div>
     <div class="box">
       <div class="label">DIFFICULTY</div>
@@ -579,7 +584,7 @@ function toggleMute(){ if(volume>0){ lastVol=volume; setVolume(0); } else { setV
 function goHome(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='HOME'; show('screen-home'); }
 function openQuiz(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='QUIZ'; show('q-start'); }
 function openLyrics(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='LYRICS'; show('l-start'); }
-function openRhythm(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='RHYTHM'; rSelected=null; document.getElementById('r-start').disabled=true; document.querySelectorAll('#r-song-list .song-item').forEach(x=>x.classList.remove('sel')); rRenderKeyGuide(); show('r-select'); }
+function openRhythm(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='RHYTHM'; rSelected=null; document.getElementById('r-start').disabled=true; document.querySelectorAll('#r-song-list .song-item').forEach(x=>x.classList.remove('sel')); document.getElementById('r-search').value=''; rFilterSongs(); rRenderKeyGuide(); show('r-select'); }
 
 document.getElementById('home-foot').textContent='TRACKS: '+SONGS.length+' · WAVEFORM SYNC ENGINE';
 
@@ -847,6 +852,19 @@ SONGS.forEach((s,i)=>{ const d=document.createElement('div'); d.className='song-
   d.addEventListener('click',()=>{ document.querySelectorAll('#r-song-list .song-item').forEach(x=>x.classList.remove('sel')); d.classList.add('sel'); rSelected=i; document.getElementById('r-start').disabled=false; });
   rList.appendChild(d);
 });
+function rFilterSongs(){
+  const q=normalize(document.getElementById('r-search').value);
+  let any=false;
+  document.querySelectorAll('#r-song-list .song-item').forEach(el=>{
+    const s=SONGS[+el.dataset.i];
+    const hay=normalize(s.title+s.char+s.thumb+(s.aliases||[]).join(''));
+    const show = q==='' || hay.includes(q);
+    el.style.display = show?'':'none';
+    if(show) any=true;
+  });
+  document.getElementById('r-noresult').style.display=any?'none':'block';
+}
+document.getElementById('r-search').addEventListener('input',rFilterSongs);
 document.querySelectorAll('#r-diff-grid .opt').forEach(o=>o.addEventListener('click',()=>{document.querySelectorAll('#r-diff-grid .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');rDiff=o.dataset.d;}));
 
 function buildBeatmap(buffer,diff){
