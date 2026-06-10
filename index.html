@@ -220,6 +220,23 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 .badges{display:flex;gap:5px;flex-shrink:0;}
 .badge{width:23px;height:23px;border-radius:50%;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:11px;color:rgba(255,255,255,.22);background:rgba(255,255,255,.02);transition:.2s;}
 .badge.on{color:#000;background:#fff;border-color:#fff;box-shadow:0 0 10px rgba(255,255,255,.5);}
+.badge.count{width:auto;min-width:23px;padding:0 9px;border-radius:12px;font-family:monospace;font-size:9px;font-weight:900;color:rgba(255,255,255,.7);letter-spacing:.5px;cursor:none !important;}
+.badge.count:hover{background:#fff;color:#000;border-color:#fff;}
+@media(pointer:coarse){.badge.count{cursor:pointer !important;}}
+
+/* ACHIEVEMENTS GALLERY */
+.ach-prog{font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.55);font-family:monospace;}
+.ach-list{width:100%;display:flex;flex-direction:column;gap:6px;max-height:64vh;overflow-y:auto;padding-right:2px;}
+.ach-item{display:flex;align-items:center;gap:12px;padding:11px 13px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.02);transition:.2s;}
+.ach-item.on{border-color:rgba(255,255,255,.45);box-shadow:0 0 12px rgba(255,255,255,.07);}
+.ach-item.off{opacity:.45;}
+.ach-dot{width:36px;height:36px;border-radius:50%;border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;color:rgba(255,255,255,.3);}
+.ach-item.on .ach-dot{background:#fff;color:#000;border-color:#fff;box-shadow:0 0 12px rgba(255,255,255,.5);}
+.ach-info{flex:1;min-width:0;}
+.ach-name{font-size:13px;font-weight:900;letter-spacing:1px;}
+.ach-desc{font-size:10px;color:rgba(255,255,255,.5);letter-spacing:.3px;margin-top:2px;}
+.ach-status{font-size:8px;letter-spacing:2px;font-family:monospace;color:rgba(255,255,255,.35);flex-shrink:0;}
+.ach-item.on .ach-status{color:#fff;}
 
 /* SURVIVAL TIMER */
 .surv-timer{width:100%;display:flex;align-items:center;gap:10px;}
@@ -305,6 +322,16 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
       </div>
     </div>
     <div class="home-foot" id="home-foot">TRACKS: 27 · WAVEFORM SYNC ENGINE</div>
+    <button class="btn ghost" style="max-width:430px;" onclick="openAch()">🏅 ACHIEVEMENTS · 업적 보기</button>
+  </div>
+
+  <!-- ════════ ACHIEVEMENTS ════════ -->
+  <div class="screen" id="screen-ach">
+    <div class="backbar"><button class="back-btn" onclick="goHome()">‹ HOME</button></div>
+    <div class="eyebrow">// ACHIEVEMENTS</div>
+    <div class="title-big" style="font-size:26px;">업적</div>
+    <div class="ach-prog" id="ach-prog">0 / 0 달성</div>
+    <div class="ach-list" id="ach-list"></div>
   </div>
 
   <!-- ════════ QUIZ : START ════════ -->
@@ -618,16 +645,44 @@ function toggleMute(){ if(volume>0){ lastVol=volume; setVolume(0); } else { setV
 
 // ── ACHIEVEMENTS / PROFILE ──
 const ACHS=[
-  {id:'first_s',  sym:'★', name:'첫 S랭크',   desc:'리듬게임에서 S랭크 달성'},
-  {id:'full_combo',sym:'∞',name:'올 콤보',     desc:'리듬게임 MISS 0으로 클리어'},
-  {id:'lyric_one',sym:'✎', name:'한 줄의 직감', desc:'가사 한 줄만 보고 정답'},
-  {id:'quiz_ace', sym:'♪', name:'퍼펙트 이어',  desc:'뮤직퀴즈 전곡 정답'},
-  {id:'survivor', sym:'⏱', name:'서바이버',     desc:'서바이벌에서 10곡 이상'},
+  {id:'r_clear',    sym:'▶', name:'첫 발걸음',     desc:'리듬게임 첫 클리어'},
+  {id:'first_s',    sym:'★', name:'첫 S랭크',      desc:'리듬게임에서 S랭크 달성'},
+  {id:'full_combo', sym:'∞', name:'올 콤보',        desc:'리듬게임 MISS 0으로 클리어'},
+  {id:'all_perfect',sym:'◆', name:'올 퍼펙트',      desc:'전부 PERFECT로 클리어'},
+  {id:'combo_100',  sym:'⚡', name:'100 콤보',       desc:'최대 콤보 100 이상'},
+  {id:'combo_200',  sym:'✦', name:'200 콤보',       desc:'최대 콤보 200 이상'},
+  {id:'hard_clear', sym:'☠', name:'하드코어',       desc:'HARD 난이도 클리어'},
+  {id:'fever',      sym:'⚠', name:'시스템 오버로드', desc:'피버(50콤보) 발동'},
+  {id:'quiz_ace',   sym:'♪', name:'퍼펙트 이어',     desc:'뮤직퀴즈 전곡 정답'},
+  {id:'streak_5',   sym:'▤', name:'연속 5콤보',      desc:'퀴즈 5문제 연속 정답'},
+  {id:'survivor',   sym:'⏱', name:'서바이버',        desc:'서바이벌에서 10곡 이상'},
+  {id:'survivor_pro',sym:'⏲',name:'타임 마스터',     desc:'서바이벌에서 20곡 이상'},
+  {id:'lyric_one',  sym:'✎', name:'한 줄의 직감',    desc:'가사 한 줄만 보고 정답'},
+  {id:'lyric_ace',  sym:'❝', name:'가사 마스터',     desc:'가사퀴즈 전곡 정답'},
+  {id:'explorer',   sym:'◉', name:'탐험가',          desc:'세 가지 모드 모두 플레이'},
 ];
 let achSet=new Set();
 try{ const a=JSON.parse(localStorage.getItem('arch_ach')||'[]'); if(Array.isArray(a)) achSet=new Set(a); }catch(e){}
+let modeSet=new Set();
+try{ const a=JSON.parse(localStorage.getItem('arch_modes')||'[]'); if(Array.isArray(a)) modeSet=new Set(a); }catch(e){}
+function markMode(m){ if(modeSet.has(m))return; modeSet.add(m); try{ localStorage.setItem('arch_modes',JSON.stringify([...modeSet])); }catch(e){} if(modeSet.size>=3) unlockAch('explorer'); }
 function unlockAch(id){ if(achSet.has(id))return; const def=ACHS.find(x=>x.id===id); if(!def)return; achSet.add(id); try{ localStorage.setItem('arch_ach',JSON.stringify([...achSet])); }catch(e){} renderBadges(); notify('🏅 ACHIEVEMENT · '+def.name); }
-function renderBadges(){ const el=document.getElementById('badges'); if(!el)return; el.innerHTML=ACHS.map(a=>'<span class="badge'+(achSet.has(a.id)?' on':'')+'" title="'+a.name+' — '+a.desc+'">'+a.sym+'</span>').join(''); }
+function renderBadges(){ const el=document.getElementById('badges'); if(!el)return;
+  const unlocked=ACHS.filter(a=>achSet.has(a.id));
+  let html=unlocked.slice(0,5).map(a=>'<span class="badge on" title="'+a.name+'">'+a.sym+'</span>').join('');
+  html+='<span class="badge count" onclick="openAch()" title="업적 보기">'+achSet.size+'/'+ACHS.length+'</span>';
+  el.innerHTML=html;
+}
+function renderAchList(){
+  const el=document.getElementById('ach-list'); if(!el)return; el.innerHTML='';
+  ACHS.forEach(a=>{ const on=achSet.has(a.id);
+    const d=document.createElement('div'); d.className='ach-item '+(on?'on':'off');
+    d.innerHTML='<div class="ach-dot">'+a.sym+'</div><div class="ach-info"><div class="ach-name">'+a.name+'</div><div class="ach-desc">'+a.desc+'</div></div><div class="ach-status">'+(on?'UNLOCKED':'LOCKED')+'</div>';
+    el.appendChild(d);
+  });
+  document.getElementById('ach-prog').textContent=achSet.size+' / '+ACHS.length+' 달성';
+}
+function openAch(){ qStop(); rStopAll(); renderAchList(); document.getElementById('hdr-mode').textContent='ACHIEVE'; show('screen-ach'); }
 let nick=''; try{ nick=localStorage.getItem('arch_nick')||''; }catch(e){}
 function initProfile(){ const inp=document.getElementById('nick-input'); if(inp){ inp.value=nick; inp.addEventListener('input',()=>{ nick=inp.value; try{ localStorage.setItem('arch_nick',nick); }catch(e){} }); } renderBadges(); }
 
@@ -675,6 +730,7 @@ function qStart(){
   qClip=parseInt(document.querySelector('#q-diff-grid .opt.sel').dataset.sec,10);
   const n=parseInt(document.querySelector('#q-rounds-grid .opt.sel').dataset.n,10);
   qMode=document.querySelector('#q-mode-grid .opt.sel').dataset.m;
+  markMode('music');
   qOrder=shuffle(SONGS.map((_,i)=>i)); if(qMode==='normal' && n>0)qOrder=qOrder.slice(0,n);
   qRoundCount=qOrder.length; qIdx=0; qScore=0; qStreak=0; qResults=[]; qSurvCount=0; qOver=false;
   clearInterval(qTimerInt);
@@ -737,6 +793,7 @@ function qSubmit(){
   if(isCorrect(val,qSong)){
     qSolved=true; const g=Math.max(40,qBase); qScore+=g; qStreak++;
     if(qMode==='survival'){ qTimeLeft=Math.min(99,qTimeLeft+5); qSurvCount++; qTimeDelta('+5s'); qUpdateTimer(); }
+    if(qStreak>=5) unlockAch('streak_5');
     const fb=document.getElementById('q-feedback'); fb.className='feedback ok'; fb.textContent='✓ CORRECT  +'+g;
     ans.classList.add('ok'); ans.disabled=true; qReveal(true);
   } else {
@@ -776,7 +833,7 @@ function qResult(){
   qaudio.pause(); clearInterval(qTimerInt);
   const hits=qResults.filter(r=>r.correct).length;
   document.getElementById('q-res-score').textContent=qScore;
-  if(qMode==='survival'){ document.getElementById('q-res-sub').textContent='SURVIVAL · '+qSurvCount+'곡 정답'; if(qSurvCount>=10) unlockAch('survivor'); }
+  if(qMode==='survival'){ document.getElementById('q-res-sub').textContent='SURVIVAL · '+qSurvCount+'곡 정답'; if(qSurvCount>=10) unlockAch('survivor'); if(qSurvCount>=20) unlockAch('survivor_pro'); }
   else { document.getElementById('q-res-sub').textContent=hits+' / '+qRoundCount+' 정답'; if(hits===qRoundCount && qRoundCount>0) unlockAch('quiz_ace'); }
   document.getElementById('hdr-mode').textContent='COMPLETE';
   const list=document.getElementById('q-res-list'); list.innerHTML='';
@@ -796,6 +853,7 @@ document.querySelectorAll('#l-rounds-grid .opt').forEach(o=>o.addEventListener('
 
 function lStart(){
   lSnipN=parseInt(document.querySelector('#l-diff-grid .opt.sel').dataset.n,10);
+  markMode('lyrics');
   const n=parseInt(document.querySelector('#l-rounds-grid .opt.sel').dataset.n,10);
   lOrder=shuffle(SONGS.map((_,i)=>i)); if(n>0)lOrder=lOrder.slice(0,n);
   lRoundCount=lOrder.length; lIdx=0; lScore=0; lStreak=0; lResults=[];
@@ -845,6 +903,7 @@ function lSubmit(){
   if(isCorrect(val,lSong)){
     lSolved=true; const g=Math.max(40,lBase); lScore+=g; lStreak++;
     if(lSnipN===1) unlockAch('lyric_one');
+    if(lStreak>=5) unlockAch('streak_5');
     const fb=document.getElementById('l-feedback'); fb.className='feedback ok'; fb.textContent='✓ CORRECT  +'+g;
     ans.classList.add('ok'); ans.disabled=true; lReveal(true);
   } else {
@@ -878,6 +937,7 @@ function lResult(){
   const hits=lResults.filter(r=>r.correct).length;
   document.getElementById('l-res-score').textContent=lScore;
   document.getElementById('l-res-sub').textContent=hits+' / '+lRoundCount+' 정답';
+  if(hits===lRoundCount && lRoundCount>0) unlockAch('lyric_ace');
   document.getElementById('hdr-mode').textContent='COMPLETE';
   const list=document.getElementById('l-res-list'); list.innerHTML='';
   lResults.forEach(r=>{ const row=document.createElement('div'); row.className='res-row '+(r.correct?'hit':'miss'); row.innerHTML='<div class="rmark">'+(r.correct?'✓':'✗')+'</div><div class="rt">'+escapeHtml(r.song.title)+'</div><div class="rc">'+escapeHtml(r.song.char.toUpperCase())+'</div>'; list.appendChild(row); });
@@ -961,6 +1021,7 @@ async function rStart(){
   if(rSelected===null) return;
   rDiff=document.querySelector('#r-diff-grid .opt.sel').dataset.d;
   const song=SONGS[rSelected];
+  markMode('rhythm');
   rThumbReady=false; rThumbImg=new Image(); rThumbImg.crossOrigin='anonymous';
   rThumbImg.onload=()=>{ rThumbReady=true; }; rThumbImg.onerror=()=>{ rThumbReady=false; };
   rThumbImg.src=thumbUrl(song);
@@ -1107,7 +1168,7 @@ function rJudge(lane){
   if(bestDt<=W_PERFECT){ cPerfect++; rScore+=300+combo*5; combo++; hp=Math.min(100,hp+0.7); judgeText='PERFECT'; spawnParticles(lane); }
   else { cGood++; rScore+=120+combo*2; combo++; hp=Math.min(100,hp+0.3); judgeText='GOOD'; }
   if(combo>maxCombo)maxCombo=combo;
-  if(combo>0 && combo%50===0){ feverActive=true; feverT=performance.now(); }
+  if(combo>0 && combo%50===0){ feverActive=true; feverT=performance.now(); unlockAch('fever'); }
   judgeT=performance.now(); laneFlash[lane]=1;
 }
 function rMiss(){ cMiss++; combo=0; hp=Math.max(0,hp-2.5); judgeText='MISS'; judgeT=performance.now(); }
@@ -1136,8 +1197,11 @@ function rEnd(cleared){
   document.getElementById('r-acc').textContent=acc+'%';
   document.getElementById('r-track').textContent=SONGS[rSelected].char.toUpperCase();
   document.getElementById('hdr-mode').textContent='RESULT';
+  if(cleared){ unlockAch('r_clear'); if(rDiff==='hard') unlockAch('hard_clear'); if(cMiss===0 && cGood===0 && cPerfect>0) unlockAch('all_perfect'); }
   if(cleared && rank==='S') unlockAch('first_s');
   if(cleared && cMiss===0 && (cPerfect+cGood)>0) unlockAch('full_combo');
+  if(maxCombo>=100) unlockAch('combo_100');
+  if(maxCombo>=200) unlockAch('combo_200');
   show('r-result');
 }
 function rRetry(){ document.getElementById('r-pause').classList.remove('on'); if(rSelected!==null&&audioBuf){ rCountdown(SONGS[rSelected]); } }
