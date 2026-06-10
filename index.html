@@ -739,7 +739,14 @@ function lLoadRound(){
   lSong=SONGS[lOrder[lIdx]];
   lSolved=false; lAttempts=0; lHintUsed=0; lBase=100;
   const raw=(typeof LYRICS!=='undefined' && LYRICS[lSong.thumb]) ? LYRICS[lSong.thumb] : '(가사 없음)';
-  const isSec=ln=>{ const t=ln.trim(); return t!=='' && /^[\[【(].*[\]】)]$/.test(t); };
+  const isSec=ln=>{
+    let t=(ln||'').trim();
+    if(t==='') return false;
+    if(/^[\[【(].*[\]】)]$/.test(t)) return true;
+    const kw=/^(intro|outro|verse|pre[\s-]*chorus|post[\s-]*chorus|final\s*chorus|last\s*chorus|chorus|bridge|rap\s*bridge|hook|refrain|interlude|build[\s-]*up|build|drop)\b/i;
+    if(kw.test(t)){ let rest=t.replace(kw,'').replace(/\([^)]*\)/g,'').replace(/[0-9\s\-:.]/g,''); if(rest==='') return true; }
+    return false;
+  };
   let arr=raw.split('\n').filter(ln=>!isSec(ln));
   const clean=[];
   for(const ln of arr){ if(ln.trim()===''){ if(clean.length===0||clean[clean.length-1]==='') continue; clean.push(''); } else clean.push(ln); }
