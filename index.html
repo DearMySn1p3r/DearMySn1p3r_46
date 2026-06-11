@@ -530,9 +530,10 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
     <div class="box">
       <div class="label">DIFFICULTY</div>
       <div class="opt-grid" id="r-diff-grid">
-        <div class="opt" data-d="easy"><div class="ot">EASY</div><div class="os">느리게·적게</div></div>
+        <div class="opt" data-d="easy"><div class="ot">EASY</div><div class="os">느리게</div></div>
         <div class="opt sel" data-d="normal"><div class="ot">NORMAL</div><div class="os">표준</div></div>
-        <div class="opt" data-d="hard"><div class="ot">HARD</div><div class="os">빠르게·많이</div></div>
+        <div class="opt" data-d="hard"><div class="ot">HARD</div><div class="os">빠르게</div></div>
+        <div class="opt" data-d="special"><div class="ot">SPECIAL</div><div class="os">최고난도</div></div>
       </div>
       <div class="label" style="margin-top:16px;">NOTE SPEED · <span id="r-speed-val">1.0x</span></div>
       <input id="r-speed" class="spd-slider" type="range" min="6" max="30" value="10" aria-label="note speed">
@@ -561,11 +562,11 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
     <div class="hp-wrap"><div class="hp-fill" id="r-hp"></div></div>
     <div class="song-prog"><div class="song-prog-fill" id="r-prog"></div></div>
     <div class="r-touch" id="r-touch">
-      <div class="r-touch-btn" data-lane="0">◄</div>
+      <div class="r-touch-btn" data-lane="0">◀</div>
       <div class="r-touch-btn" data-lane="1">▼</div>
-      <div class="r-touch-btn" data-lane="2">▮</div>
+      <div class="r-touch-btn" data-lane="2">■</div>
       <div class="r-touch-btn" data-lane="3">▲</div>
-      <div class="r-touch-btn" data-lane="4">►</div>
+      <div class="r-touch-btn" data-lane="4">▶</div>
     </div>
     <button class="btn ghost" style="max-width:460px;margin-top:6px;" onclick="rQuit()">[ QUIT ]</button>
   </div>
@@ -1007,7 +1008,7 @@ document.getElementById('l-answer').addEventListener('keydown',e=>{ if(e.key==='
 // ═══════════════════════════════════════════════════════════
 //  RHYTHM
 // ═══════════════════════════════════════════════════════════
-const DIFF={ easy:{minGap:0.50,k:2.3,travel:2.10}, normal:{minGap:0.34,k:1.9,travel:1.70}, hard:{minGap:0.22,k:1.5,travel:1.35} };
+const DIFF={ easy:{minGap:0.50,k:2.3,travel:2.10}, normal:{minGap:0.34,k:1.9,travel:1.70}, hard:{minGap:0.22,k:1.5,travel:1.35}, special:{minGap:0.13,k:1.05,travel:1.08} };
 let rSpeed=1.0; try{ const s=parseFloat(localStorage.getItem('arch_notespeed')); if(s>=0.6&&s<=3) rSpeed=s; }catch(e){}
 function rTravel(){ return DIFF[rDiff].travel / rSpeed; }
 function rSetSpeed(v){ rSpeed=Math.min(3,Math.max(0.6,v)); try{ localStorage.setItem('arch_notespeed',rSpeed); }catch(e){} const sl=document.getElementById('r-speed'); if(sl) sl.value=Math.round(rSpeed*10); const lbl=document.getElementById('r-speed-val'); if(lbl) lbl.textContent=rSpeed.toFixed(1)+'x'; }
@@ -1195,6 +1196,17 @@ function drawFever(){
   rctx.fillText('FEVER · '+combo+' COMBO', CW/2, y+CH*0.028);
   rctx.restore();
 }
+function laneIcon(lane,cx,cy,s,color){
+  rctx.fillStyle=color;
+  if(lane===2){ const q=s*0.46; rr(cx-q,cy-q,q*2,q*2,3*dpr); rctx.fill(); return; }
+  const h=s*0.55, w=s*0.62;
+  rctx.beginPath();
+  if(lane===0){ rctx.moveTo(cx-w,cy); rctx.lineTo(cx+w*0.7,cy-h); rctx.lineTo(cx+w*0.7,cy+h); }
+  else if(lane===4){ rctx.moveTo(cx+w,cy); rctx.lineTo(cx-w*0.7,cy-h); rctx.lineTo(cx-w*0.7,cy+h); }
+  else if(lane===1){ rctx.moveTo(cx,cy+w); rctx.lineTo(cx-h,cy-w*0.7); rctx.lineTo(cx+h,cy-w*0.7); }
+  else if(lane===3){ rctx.moveTo(cx,cy-w); rctx.lineTo(cx-h,cy+w*0.7); rctx.lineTo(cx+h,cy+w*0.7); }
+  rctx.closePath(); rctx.fill();
+}
 function rDrawField(){
   rctx.clearRect(0,0,CW,CH);
   rDrawBackground();
@@ -1205,7 +1217,7 @@ function rDrawField(){
   for(let i=0;i<LANES;i++){ const cx=i*LANE_W+LANE_W/2, lit=laneFlash[i]>0.3||keyDown[i];
     rctx.strokeStyle=lit?'rgba(255,255,255,.95)':'rgba(255,255,255,.35)'; rctx.lineWidth=2*dpr;
     rr(cx-LANE_W*0.34,JUDGE_Y-LANE_W*0.18,LANE_W*0.68,LANE_W*0.36,6*dpr); rctx.stroke();
-    rctx.fillStyle=lit?'rgba(255,255,255,.9)':'rgba(255,255,255,.4)'; rctx.font='900 '+(LANE_W*0.34)+'px Orbitron, sans-serif'; rctx.fillText(LANE_SYM[i],cx,JUDGE_Y); }
+    laneIcon(i,cx,JUDGE_Y,LANE_W*0.30, lit?'rgba(255,255,255,.95)':'rgba(255,255,255,.45)'); }
 }
 function rDrawNotes(pos,travel){ const top=CH*0.02, nh=LANE_W*0.34, nw=LANE_W*0.74, rad=6*dpr, span=JUDGE_Y-top;
   rctx.fillStyle='#fff';
@@ -1278,7 +1290,7 @@ function rEnd(cleared){
   document.getElementById('r-acc').textContent=acc+'%';
   document.getElementById('r-track').textContent=SONGS[rSelected].char.toUpperCase();
   document.getElementById('hdr-mode').textContent='RESULT';
-  if(cleared){ unlockAch('r_clear'); if(rDiff==='hard') unlockAch('hard_clear'); if(cMiss===0 && cGood===0 && cPerfect>0) unlockAch('all_perfect'); }
+  if(cleared){ unlockAch('r_clear'); if(rDiff==='hard'||rDiff==='special') unlockAch('hard_clear'); if(cMiss===0 && cGood===0 && cPerfect>0) unlockAch('all_perfect'); }
   if(cleared && rank==='S') unlockAch('first_s');
   if(cleared && cMiss===0 && (cPerfect+cGood)>0) unlockAch('full_combo');
   if(maxCombo>=100) unlockAch('combo_100');
