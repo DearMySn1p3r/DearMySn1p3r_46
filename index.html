@@ -140,6 +140,9 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 #r-canvas{display:block;width:100%;height:auto;aspect-ratio:460/620;border:1px solid rgba(255,255,255,.45);box-shadow:0 0 35px rgba(255,255,255,.07),inset 0 0 50px rgba(0,0,0,.6);background:#000;}
 .game-top{display:flex;justify-content:space-between;align-items:center;width:100%;max-width:460px;margin-bottom:8px;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.6);}
 .game-top .song-nm{color:#fff;font-weight:700;}
+.r-pause-btn{flex-shrink:0;width:40px;height:30px;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.04);color:#fff;font-family:var(--font);font-size:11px;letter-spacing:1px;border-radius:6px;transition:.15s;}
+.r-pause-btn:hover{background:#fff;color:#000;box-shadow:0 0 12px rgba(255,255,255,.4);}
+@media(pointer:coarse){.r-pause-btn{width:52px;height:40px;font-size:14px;}}
 .hp-wrap{width:100%;max-width:460px;height:6px;border:1px solid rgba(255,255,255,.25);margin-top:8px;position:relative;overflow:hidden;}
 .hp-fill{position:absolute;left:0;top:0;bottom:0;width:100%;background:#fff;box-shadow:0 0 12px rgba(255,255,255,.6);transition:width .15s;}
 .song-prog{width:100%;max-width:460px;height:3px;background:rgba(255,255,255,.1);margin-top:6px;position:relative;}
@@ -247,6 +250,21 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 .surv-sec{font-family:monospace;font-size:14px;font-weight:900;letter-spacing:1px;min-width:58px;text-align:right;}
 .surv-delta{font-family:var(--font);font-size:12px;font-weight:900;letter-spacing:1px;min-width:42px;text-align:left;color:#fff;opacity:0;transition:opacity .1s;}
 .surv-delta.show{opacity:1;}
+
+/* MOBILE / TOUCH */
+#r-canvas{touch-action:none;}
+.r-touch{display:none;width:100%;max-width:460px;gap:6px;margin-top:8px;}
+.r-touch-btn{flex:1;height:82px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:900;color:rgba(255,255,255,.7);user-select:none;touch-action:none;border-radius:8px;transition:background .05s;}
+.r-touch-btn.active{background:#fff;color:#000;box-shadow:0 0 18px rgba(255,255,255,.6);}
+@media(pointer:coarse){
+  .r-touch{display:flex;}
+  .btn{min-height:52px;}
+  .opt{min-height:56px;}
+  .song-item{padding:13px 12px;}
+  #q-answer,#l-answer,.r-search,.nick-input{font-size:16px;}
+  .back-btn{padding:10px 16px;}
+  .kc-btn{min-height:40px;}
+}
 
 @media(max-width:560px){header{padding:0 12px;}.hdr-title{font-size:15px;}.hdr-sub{display:none;}.title-big{font-size:24px;}.answer-row{flex-direction:column;}.answer-row .btn{flex:1;}.thumb-wrap{width:200px;height:200px;}#vol-slider{width:54px;}.hdr-right{font-size:9px;}}
 </style>
@@ -386,6 +404,7 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
       <div class="progress"><div class="progress-fill" id="q-pfill"></div></div>
       <div class="audio-row">
         <button class="btn" id="q-play" onclick="qPlay(false)"><span class="ico">▶</span> PLAY_CLIP</button>
+        <button class="btn ghost" onclick="qStopClip()"><span class="ico">■</span> 정지</button>
         <button class="btn ghost" onclick="qPlay(true)">↻ 다른 구간</button>
       </div>
       <div class="clip-meta" id="q-clipmeta">CLIP 15s</div>
@@ -440,6 +459,11 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
         <div class="opt" data-n="10"><div class="ot">QUICK</div><div class="os">10곡</div></div>
         <div class="opt sel" data-n="0"><div class="ot">FULL</div><div class="os">전체 27곡</div></div>
       </div>
+      <div class="label" style="margin-top:16px;">MODE</div>
+      <div class="opt-grid" id="l-mode-grid">
+        <div class="opt sel" data-m="normal"><div class="ot">NORMAL</div><div class="os">차례대로</div></div>
+        <div class="opt" data-m="survival"><div class="ot">SURVIVAL</div><div class="os">30초 타임어택</div></div>
+      </div>
     </div>
     <button class="btn primary" onclick="lStart()"><span class="ico">▶</span> START_QUIZ</button>
   </div>
@@ -450,6 +474,11 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
       <div class="stat"><div class="sl">ROUND</div><div class="sv" id="l-round">1/27</div></div>
       <div class="stat"><div class="sl">SCORE</div><div class="sv" id="l-score">0</div></div>
       <div class="stat"><div class="sl">STREAK</div><div class="sv" id="l-streak">0</div></div>
+    </div>
+    <div class="surv-timer" id="l-timer-wrap" style="display:none;">
+      <div class="surv-bar"><div class="surv-fill" id="l-timer-fill"></div></div>
+      <div class="surv-sec" id="l-timer-sec">30.0s</div>
+      <div class="surv-delta" id="l-timer-delta"></div>
     </div>
     <div class="lyrics-more" style="margin-top:0;margin-bottom:-6px;">⟪ RANDOM LYRIC ⟫</div>
     <div class="lyrics-box"><div class="lyrics-text" id="l-text"></div></div>
@@ -515,7 +544,7 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 
   <!-- ════════ RHYTHM : GAME ════════ -->
   <div class="screen" id="r-game">
-    <div class="game-top"><span class="song-nm" id="r-song">—</span><span>SCORE <span id="r-score" style="color:#fff;font-weight:900">0</span></span></div>
+    <div class="game-top"><span class="song-nm" id="r-song">—</span><span>SCORE <span id="r-score" style="color:#fff;font-weight:900">0</span></span><button class="r-pause-btn" onclick="rTogglePause()" aria-label="pause">❚❚</button></div>
     <div id="r-game-frame"><canvas id="r-canvas" width="460" height="620"></canvas>
       <div id="r-pause" class="pause-ov">
         <div class="pause-title">PAUSED</div>
@@ -526,6 +555,13 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
     </div>
     <div class="hp-wrap"><div class="hp-fill" id="r-hp"></div></div>
     <div class="song-prog"><div class="song-prog-fill" id="r-prog"></div></div>
+    <div class="r-touch" id="r-touch">
+      <div class="r-touch-btn" data-lane="0">◄</div>
+      <div class="r-touch-btn" data-lane="1">▼</div>
+      <div class="r-touch-btn" data-lane="2">▮</div>
+      <div class="r-touch-btn" data-lane="3">▲</div>
+      <div class="r-touch-btn" data-lane="4">►</div>
+    </div>
     <button class="btn ghost" style="max-width:460px;margin-top:6px;" onclick="rQuit()">[ QUIT ]</button>
   </div>
 
@@ -682,15 +718,15 @@ function renderAchList(){
   });
   document.getElementById('ach-prog').textContent=achSet.size+' / '+ACHS.length+' 달성';
 }
-function openAch(){ qStop(); rStopAll(); renderAchList(); document.getElementById('hdr-mode').textContent='ACHIEVE'; show('screen-ach'); }
+function openAch(){ qStop(); rStopAll(); lStop(); renderAchList(); document.getElementById('hdr-mode').textContent='ACHIEVE'; show('screen-ach'); }
 let nick=''; try{ nick=localStorage.getItem('arch_nick')||''; }catch(e){}
 function initProfile(){ const inp=document.getElementById('nick-input'); if(inp){ inp.value=nick; inp.addEventListener('input',()=>{ nick=inp.value; try{ localStorage.setItem('arch_nick',nick); }catch(e){} }); } renderBadges(); }
 
 // ── NAV ──
-function goHome(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='HOME'; show('screen-home'); }
-function openQuiz(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='QUIZ'; show('q-start'); }
-function openLyrics(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='LYRICS'; show('l-start'); }
-function openRhythm(){ qStop(); rStopAll(); document.getElementById('hdr-mode').textContent='RHYTHM'; rSelected=null; document.getElementById('r-start').disabled=true; document.querySelectorAll('#r-song-list .song-item').forEach(x=>x.classList.remove('sel')); document.getElementById('r-search').value=''; rFilterSongs(); rRenderKeyGuide(); show('r-select'); }
+function goHome(){ qStop(); rStopAll(); lStop(); document.getElementById('hdr-mode').textContent='HOME'; show('screen-home'); }
+function openQuiz(){ qStop(); rStopAll(); lStop(); document.getElementById('hdr-mode').textContent='QUIZ'; show('q-start'); }
+function openLyrics(){ qStop(); rStopAll(); lStop(); document.getElementById('hdr-mode').textContent='LYRICS'; show('l-start'); }
+function openRhythm(){ qStop(); rStopAll(); lStop(); document.getElementById('hdr-mode').textContent='RHYTHM'; rSelected=null; document.getElementById('r-start').disabled=true; document.querySelectorAll('#r-song-list .song-item').forEach(x=>x.classList.remove('sel')); document.getElementById('r-search').value=''; rFilterSongs(); rRenderKeyGuide(); show('r-select'); }
 
 document.getElementById('home-foot').textContent='TRACKS: '+SONGS.length+' · WAVEFORM SYNC ENGINE';
 
@@ -705,7 +741,7 @@ let qStopTimer=null, qRaf=null;
 document.querySelectorAll('#q-diff-grid .opt').forEach(o=>o.addEventListener('click',()=>{document.querySelectorAll('#q-diff-grid .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');}));
 document.querySelectorAll('#q-rounds-grid .opt').forEach(o=>o.addEventListener('click',()=>{document.querySelectorAll('#q-rounds-grid .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');}));
 document.querySelectorAll('#q-mode-grid .opt').forEach(o=>o.addEventListener('click',()=>{document.querySelectorAll('#q-mode-grid .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');}));
-let qMode='normal', qTimeLeft=60, qTimerInt=null, qSurvCount=0, qOver=false;
+let qMode='normal', qTimeLeft=30, qTimerInt=null, qSurvCount=0, qOver=false, qSurvMax=30;
 
 // answer matching
 function normalize(s){ return (s||'').toLowerCase().replace(/\s+/g,'').replace(/[!?.,~…·・'"`’“”\-_()[\]{}:;/\\]/g,'').trim(); }
@@ -735,12 +771,12 @@ function qStart(){
   qRoundCount=qOrder.length; qIdx=0; qScore=0; qStreak=0; qResults=[]; qSurvCount=0; qOver=false;
   clearInterval(qTimerInt);
   const tw=document.getElementById('q-timer-wrap');
-  if(qMode==='survival'){ qTimeLeft=60; tw.style.display='flex'; qStartTimer(); document.getElementById('hdr-mode').textContent='SURVIVAL'; }
+  if(qMode==='survival'){ qSurvMax=30; qTimeLeft=30; tw.style.display='flex'; qStartTimer(); document.getElementById('hdr-mode').textContent='SURVIVAL'; }
   else { tw.style.display='none'; document.getElementById('hdr-mode').textContent=qClip+'S/'+qRoundCount+'Q'; }
   show('q-game'); qLoadRound();
 }
 function qStartTimer(){ clearInterval(qTimerInt); qUpdateTimer(); qTimerInt=setInterval(()=>{ qTimeLeft-=0.1; if(qTimeLeft<=0){ qTimeLeft=0; qUpdateTimer(); qSurvOver(); return; } qUpdateTimer(); },100); }
-function qUpdateTimer(){ const f=document.getElementById('q-timer-fill'); f.style.width=Math.max(0,Math.min(100,(qTimeLeft/60)*100))+'%'; f.classList.toggle('low',qTimeLeft<=10); document.getElementById('q-timer-sec').textContent=qTimeLeft.toFixed(1)+'s'; }
+function qUpdateTimer(){ const f=document.getElementById('q-timer-fill'); f.style.width=Math.max(0,Math.min(100,(qTimeLeft/qSurvMax)*100))+'%'; f.classList.toggle('low',qTimeLeft<=8); document.getElementById('q-timer-sec').textContent=qTimeLeft.toFixed(1)+'s'; }
 function qTimeDelta(t){ const d=document.getElementById('q-timer-delta'); d.textContent=t; d.classList.add('show'); setTimeout(()=>d.classList.remove('show'),700); }
 function qSurvOver(){ if(qOver)return; qOver=true; clearInterval(qTimerInt); qSolved=true; try{qaudio.pause();}catch(e){} notify('TIME OVER'); qResult(); }
 function qLoadRound(){
@@ -771,6 +807,7 @@ qaudio.addEventListener('loadedmetadata',()=>{
 });
 qaudio.addEventListener('error',()=>{ if(qSong) document.getElementById('q-clipmeta').textContent='⚠ 오디오 로드 실패 — 파일명/버킷 확인'; document.getElementById('q-play').disabled=false; });
 
+function qStopClip(){ try{qaudio.pause();}catch(e){} clearTimeout(qStopTimer); cancelAnimationFrame(qRaf); document.getElementById('q-clipmeta').textContent='⏹ 정지됨 · ▶ 다시 재생'; }
 function qPlay(randomize){
   if(!qSong) return;
   if(randomize&&qDurReady){ const d=qaudio.duration||0; const lo=d*0.06,hi=Math.max(lo,Math.min(d*0.6,d-qClip-1)); qStartAt=hi>lo?(lo+Math.random()*(hi-lo)):0; }
@@ -850,14 +887,25 @@ let lSong=null, lLines=[], lSnippet=[], lShowFull=false, lAttempts=0, lHintUsed=
 
 document.querySelectorAll('#l-diff-grid .opt').forEach(o=>o.addEventListener('click',()=>{document.querySelectorAll('#l-diff-grid .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');}));
 document.querySelectorAll('#l-rounds-grid .opt').forEach(o=>o.addEventListener('click',()=>{document.querySelectorAll('#l-rounds-grid .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');}));
+document.querySelectorAll('#l-mode-grid .opt').forEach(o=>o.addEventListener('click',()=>{document.querySelectorAll('#l-mode-grid .opt').forEach(x=>x.classList.remove('sel'));o.classList.add('sel');}));
+let lMode='normal', lTimeLeft=30, lTimerInt=null, lSurvCount=0, lOver=false, lSurvMax=30;
+function lStop(){ clearInterval(lTimerInt); }
+function lStartTimer(){ clearInterval(lTimerInt); lUpdateTimer(); lTimerInt=setInterval(()=>{ lTimeLeft-=0.1; if(lTimeLeft<=0){ lTimeLeft=0; lUpdateTimer(); lSurvOver(); return; } lUpdateTimer(); },100); }
+function lUpdateTimer(){ const f=document.getElementById('l-timer-fill'); f.style.width=Math.max(0,Math.min(100,(lTimeLeft/lSurvMax)*100))+'%'; f.classList.toggle('low',lTimeLeft<=8); document.getElementById('l-timer-sec').textContent=lTimeLeft.toFixed(1)+'s'; }
+function lTimeDelta(t){ const d=document.getElementById('l-timer-delta'); d.textContent=t; d.classList.add('show'); setTimeout(()=>d.classList.remove('show'),700); }
+function lSurvOver(){ if(lOver)return; lOver=true; clearInterval(lTimerInt); lSolved=true; notify('TIME OVER'); lResult(); }
 
 function lStart(){
   lSnipN=parseInt(document.querySelector('#l-diff-grid .opt.sel').dataset.n,10);
   markMode('lyrics');
   const n=parseInt(document.querySelector('#l-rounds-grid .opt.sel').dataset.n,10);
-  lOrder=shuffle(SONGS.map((_,i)=>i)); if(n>0)lOrder=lOrder.slice(0,n);
-  lRoundCount=lOrder.length; lIdx=0; lScore=0; lStreak=0; lResults=[];
-  document.getElementById('hdr-mode').textContent='LYRICS/'+lRoundCount;
+  lMode=document.querySelector('#l-mode-grid .opt.sel').dataset.m;
+  lOrder=shuffle(SONGS.map((_,i)=>i)); if(lMode==='normal' && n>0)lOrder=lOrder.slice(0,n);
+  lRoundCount=lOrder.length; lIdx=0; lScore=0; lStreak=0; lResults=[]; lSurvCount=0; lOver=false;
+  clearInterval(lTimerInt);
+  const tw=document.getElementById('l-timer-wrap');
+  if(lMode==='survival'){ lSurvMax=30; lTimeLeft=30; tw.style.display='flex'; lStartTimer(); document.getElementById('hdr-mode').textContent='LYRIC SURV'; }
+  else { tw.style.display='none'; document.getElementById('hdr-mode').textContent='LYRICS/'+lRoundCount; }
   show('l-game'); lLoadRound();
 }
 function lLoadRound(){
@@ -881,7 +929,7 @@ function lLoadRound(){
   const N=Math.min(lSnipN, pool.length||1);
   const start=Math.max(0, Math.floor(Math.random()*(Math.max(1,pool.length-N+1))));
   lSnippet=pool.slice(start,start+N);
-  document.getElementById('l-round').textContent=(lIdx+1)+'/'+lRoundCount;
+  document.getElementById('l-round').textContent = lMode==='survival' ? ('정답 '+lSurvCount) : ((lIdx+1)+'/'+lRoundCount);
   document.getElementById('l-score').textContent=lScore;
   document.getElementById('l-streak').textContent=lStreak;
   document.getElementById('l-reveal').innerHTML='';
@@ -904,9 +952,11 @@ function lSubmit(){
     lSolved=true; const g=Math.max(40,lBase); lScore+=g; lStreak++;
     if(lSnipN===1) unlockAch('lyric_one');
     if(lStreak>=5) unlockAch('streak_5');
+    if(lMode==='survival'){ lTimeLeft=Math.min(99,lTimeLeft+5); lSurvCount++; lTimeDelta('+5s'); lUpdateTimer(); }
     const fb=document.getElementById('l-feedback'); fb.className='feedback ok'; fb.textContent='✓ CORRECT  +'+g;
     ans.classList.add('ok'); ans.disabled=true; lReveal(true);
   } else {
+    if(lMode==='survival'){ lTimeLeft-=10; lTimeDelta('-10s'); lUpdateTimer(); if(lTimeLeft<=0){ lSurvOver(); return; } }
     lAttempts++; lBase=Math.max(40,lBase-20); lStreak=0; document.getElementById('l-streak').textContent=lStreak;
     const fb=document.getElementById('l-feedback'); fb.className='feedback no'; fb.textContent='✗ 오답 ('+lAttempts+') — 다시 시도';
     ans.classList.remove('shake'); void ans.offsetWidth; ans.classList.add('shake'); ans.select();
@@ -918,7 +968,9 @@ function lHint(){
   const fb=document.getElementById('l-feedback'); fb.className='feedback no';
   fb.textContent='HINT — 가수 이니셜: '+lSong.char[0].toUpperCase()+' · 제목 '+lSong.title.replace(/\s/g,'').length+'글자';
 }
-function lGiveUp(){ if(lSolved)return; lSolved=true; lStreak=0; const fb=document.getElementById('l-feedback'); fb.className='feedback no'; fb.textContent='정답: '+lSong.title; document.getElementById('l-answer').disabled=true; lReveal(false); }
+function lGiveUp(){ if(lSolved)return; lSolved=true; lStreak=0;
+  if(lMode==='survival'){ lTimeLeft-=10; lTimeDelta('-10s'); lUpdateTimer(); if(lTimeLeft<=0){ lSurvOver(); return; } }
+  const fb=document.getElementById('l-feedback'); fb.className='feedback no'; fb.textContent='정답: '+lSong.title; document.getElementById('l-answer').disabled=true; lReveal(false); }
 function lReveal(correct){
   lResults.push({song:lSong,correct});
   lShowFull=true; lRenderLyrics();
@@ -931,13 +983,15 @@ function lReveal(correct){
   document.getElementById('l-hint').disabled=true;
   document.getElementById('l-next').style.display='flex';
   document.getElementById('l-next').textContent=(lIdx+1>=lRoundCount)?'SEE RESULT ▶':'NEXT ▶';
+  if(lMode==='survival'){ document.getElementById('l-next').style.display='none'; if(!lOver) setTimeout(()=>{ if(lMode==='survival'&&!lOver&&lSolved) lNext(); },1300); }
 }
-function lNext(){ lIdx++; if(lIdx>=lRoundCount){ lResult(); return; } lLoadRound(); }
+function lNext(){ if(lOver)return; if(lMode==='survival'){ lIdx++; if(lIdx>=lOrder.length){ lOrder=shuffle(lOrder); lIdx=0; } lLoadRound(); return; } lIdx++; if(lIdx>=lRoundCount){ lResult(); return; } lLoadRound(); }
 function lResult(){
+  clearInterval(lTimerInt);
   const hits=lResults.filter(r=>r.correct).length;
   document.getElementById('l-res-score').textContent=lScore;
-  document.getElementById('l-res-sub').textContent=hits+' / '+lRoundCount+' 정답';
-  if(hits===lRoundCount && lRoundCount>0) unlockAch('lyric_ace');
+  if(lMode==='survival'){ document.getElementById('l-res-sub').textContent='SURVIVAL · '+lSurvCount+'곡 정답'; if(lSurvCount>=10) unlockAch('survivor'); if(lSurvCount>=20) unlockAch('survivor_pro'); }
+  else { document.getElementById('l-res-sub').textContent=hits+' / '+lRoundCount+' 정답'; if(hits===lRoundCount && lRoundCount>0) unlockAch('lyric_ace'); }
   document.getElementById('hdr-mode').textContent='COMPLETE';
   const list=document.getElementById('l-res-list'); list.innerHTML='';
   lResults.forEach(r=>{ const row=document.createElement('div'); row.className='res-row '+(r.correct?'hit':'miss'); row.innerHTML='<div class="rmark">'+(r.correct?'✓':'✗')+'</div><div class="rt">'+escapeHtml(r.song.title)+'</div><div class="rc">'+escapeHtml(r.song.char.toUpperCase())+'</div>'; list.appendChild(row); });
@@ -1113,14 +1167,17 @@ function drawParticles(){
 }
 function drawFever(){
   if(!feverActive) return;
-  const age=performance.now()-feverT; if(age>1300){ feverActive=false; return; }
-  const p=age/1300, x=-CW*0.45 + p*CW*1.9, y=CH*0.5;
+  const age=performance.now()-feverT, dur=1500; if(age>dur){ feverActive=false; return; }
+  const p=age/dur, y=CH*0.92 - p*(CH*0.74);
   rctx.save();
-  rctx.globalAlpha=Math.sin(p*Math.PI);
-  rctx.fillStyle='rgba(255,255,255,.08)'; rctx.fillRect(0,y-34*dpr,CW,68*dpr);
-  const jx=(Math.random()-0.5)*9*dpr, jy=(Math.random()-0.5)*4*dpr;
-  rctx.fillStyle='#fff'; rctx.textAlign='center'; rctx.font='900 '+(CH*0.038)+'px Orbitron, sans-serif';
-  rctx.fillText('[ WARNING: SYSTEM OVERLOAD ]', x+jx, y+jy);
+  rctx.globalAlpha=Math.sin(p*Math.PI)*0.92;
+  rctx.textAlign='center';
+  rctx.shadowColor='rgba(255,255,255,.6)'; rctx.shadowBlur=14*dpr;
+  rctx.fillStyle='#fff'; rctx.font='900 '+(CH*0.032)+'px Orbitron, sans-serif';
+  rctx.fillText('SYSTEM OVERLOAD', CW/2, y);
+  rctx.shadowBlur=0;
+  rctx.fillStyle='rgba(255,255,255,.55)'; rctx.font='700 '+(CH*0.016)+'px Orbitron, sans-serif';
+  rctx.fillText('FEVER · '+combo+' COMBO', CW/2, y+CH*0.028);
   rctx.restore();
 }
 function rDrawField(){
@@ -1180,8 +1237,16 @@ window.addEventListener('keydown',e=>{
   const lane=laneForKey(e.key); if(lane===undefined)return; if(!rActive)return; e.preventDefault(); if(!e.repeat){ keyDown[lane]=true; if(rRunning&&!rPaused) rJudge(lane); }
 });
 window.addEventListener('keyup',e=>{ const lane=laneForKey(e.key); if(lane===undefined)return; if(!rActive)return; e.preventDefault(); keyDown[lane]=false; });
-rcanvas.addEventListener('touchstart',e=>{ if(!rRunning)return; e.preventDefault(); const r=rcanvas.getBoundingClientRect();
+rcanvas.addEventListener('touchstart',e=>{ if(!rRunning||rPaused)return; e.preventDefault(); const r=rcanvas.getBoundingClientRect();
   for(const t of e.changedTouches){ const x=(t.clientX-r.left)/r.width, lane=Math.min(LANES-1,Math.max(0,Math.floor(x*LANES))); keyDown[lane]=true; rJudge(lane); setTimeout(()=>keyDown[lane]=false,100); } },{passive:false});
+// 모바일 터치 레인 버튼 (동시 터치 지원)
+document.querySelectorAll('#r-touch .r-touch-btn').forEach(btn=>{
+  const lane=+btn.dataset.lane;
+  btn.addEventListener('touchstart',e=>{ e.preventDefault(); btn.classList.add('active'); if(rActive&&rRunning&&!rPaused){ keyDown[lane]=true; rJudge(lane); } },{passive:false});
+  const rel=e=>{ if(e)e.preventDefault(); btn.classList.remove('active'); keyDown[lane]=false; };
+  btn.addEventListener('touchend',rel,{passive:false});
+  btn.addEventListener('touchcancel',rel,{passive:false});
+});
 
 function rEnd(cleared){
   rRunning=false; rActive=false; cancelAnimationFrame(rRaf); try{ if(source)source.stop(); }catch(e){}
