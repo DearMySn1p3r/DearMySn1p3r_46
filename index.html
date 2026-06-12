@@ -219,6 +219,26 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 .pause-ov{position:absolute;inset:0;background:rgba(0,0,0,.84);display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px;z-index:5;backdrop-filter:blur(3px);}
 .pause-ov.on{display:flex;}
 .pause-title{font-size:28px;font-weight:900;letter-spacing:7px;text-shadow:0 0 22px rgba(255,255,255,.6);margin-bottom:6px;}
+.pp-row{width:100%;max-width:230px;display:flex;flex-direction:column;gap:5px;margin:2px 0;}
+.pp-label{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.6);display:flex;justify-content:space-between;align-items:center;}
+.pp-val{color:#fff;font-weight:900;font-family:monospace;}
+
+/* SYNC CALIBRATION */
+#sync-modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:50001;display:none;align-items:center;justify-content:center;backdrop-filter:blur(6px);padding:20px;}
+#sync-modal.on{display:flex;}
+.cal-pad{width:100%;max-width:240px;height:130px;border:2px solid rgba(255,255,255,.5);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;letter-spacing:4px;color:rgba(255,255,255,.85);background:rgba(255,255,255,.04);user-select:none;touch-action:manipulation;cursor:none !important;margin:8px 0;}
+.cal-pad.flash{background:rgba(255,255,255,.28);border-color:#fff;}
+@media(pointer:coarse){.cal-pad{cursor:pointer !important;height:150px;}}
+.cal-stat{display:flex;gap:28px;justify-content:center;align-items:flex-end;font-family:'Noto Sans KR',sans-serif;font-size:10px;letter-spacing:1px;color:rgba(255,255,255,.5);margin:8px 0 2px;text-align:center;}
+.cal-stat b{display:block;font-family:'Noto Sans KR',sans-serif;font-size:21px;font-weight:800;color:#fff;margin-top:4px;letter-spacing:0;}
+.cal-result{font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:700;letter-spacing:.5px;min-height:18px;text-align:center;margin:8px 0;color:#fff;}
+.share-btn:disabled{opacity:.4;}
+body.light #sync-modal{background:rgba(0,0,0,.55);}
+body.light .cal-pad{border-color:rgba(0,0,0,.5);color:rgba(0,0,0,.8);background:rgba(0,0,0,.04);}
+body.light .cal-pad.flash{background:rgba(0,0,0,.16);border-color:#000;}
+body.light .cal-stat{color:rgba(0,0,0,.55);}
+body.light .cal-stat b{color:#000;}
+body.light .cal-result{color:#000;}
 .pause-ov .btn{max-width:210px;}
 
 /* PROFILE / BADGES */
@@ -411,6 +431,42 @@ body.light .kc-key.await{color:#fff;background:#000;box-shadow:0 0 14px rgba(0,0
 body.light .kc-btn{border-color:rgba(0,0,0,.4);color:rgba(0,0,0,.8);}
 body.light .kc-btn:hover{background:#000;color:#fff;}
 body.light .cfg-hint{color:rgba(0,0,0,.4);}
+
+/* light-mode fixes: profile / badges / achievements / survival / touch / pause */
+body.light .profile{border-color:rgba(0,0,0,.16);background:rgba(0,0,0,.025);}
+body.light .profile::after{background:linear-gradient(90deg,transparent,rgba(0,0,0,.4),transparent);}
+body.light .prof-label{color:rgba(0,0,0,.45);}
+body.light .nick-input{color:#000;border-bottom-color:rgba(0,0,0,.25);}
+body.light .nick-input::placeholder{color:rgba(0,0,0,.3);}
+body.light .nick-input:focus{border-bottom-color:rgba(0,0,0,.7);}
+body.light .badge{border-color:rgba(0,0,0,.2);color:rgba(0,0,0,.35);background:rgba(0,0,0,.03);}
+body.light .badge.on{color:#fff;background:#000;border-color:#000;box-shadow:0 0 10px rgba(0,0,0,.35);}
+body.light .badge.count{color:rgba(0,0,0,.6);}
+body.light .badge.count:hover{background:#000;color:#fff;border-color:#000;}
+body.light .ach-prog{color:rgba(0,0,0,.55);}
+body.light .ach-item{border-color:rgba(0,0,0,.14);background:rgba(0,0,0,.02);}
+body.light .ach-item.on{border-color:rgba(0,0,0,.45);box-shadow:0 0 12px rgba(0,0,0,.07);}
+body.light .ach-dot{border-color:rgba(0,0,0,.2);color:rgba(0,0,0,.35);}
+body.light .ach-item.on .ach-dot{background:#000;color:#fff;border-color:#000;box-shadow:0 0 12px rgba(0,0,0,.35);}
+body.light .ach-desc{color:rgba(0,0,0,.5);}
+body.light .ach-status{color:rgba(0,0,0,.35);}
+body.light .ach-item.on .ach-status{color:#000;}
+body.light .surv-bar{border-color:rgba(0,0,0,.3);}
+body.light .surv-fill{background:#000;box-shadow:0 0 12px rgba(0,0,0,.4);}
+body.light .surv-sec{color:#000;}
+body.light .surv-delta{color:#000;}
+body.light .r-touch-btn{border-color:rgba(0,0,0,.4);background:rgba(0,0,0,.05);color:rgba(0,0,0,.7);}
+body.light .r-touch-btn.active{background:#000;color:#fff;box-shadow:0 0 18px rgba(0,0,0,.4);}
+/* pause overlay sits on the black canvas, keep its contents light in both themes */
+body.light .pause-title{color:#fff;text-shadow:0 0 22px rgba(255,255,255,.6);}
+body.light .pause-ov .btn{border-color:rgba(255,255,255,.45);color:rgba(255,255,255,.8);box-shadow:none;}
+body.light .pause-ov .btn:hover{background:#fff;color:#000;border-color:#fff;}
+body.light .pause-ov .btn.primary{border-color:#fff;color:#fff;}
+body.light .pause-ov .pp-label{color:rgba(255,255,255,.6);}
+body.light .pause-ov .pp-val{color:#fff;}
+body.light .pause-ov .spd-slider{background:rgba(255,255,255,.25);}
+body.light .pause-ov .spd-slider::-webkit-slider-thumb{background:#fff;}
+body.light .pause-ov .spd-slider::-moz-range-thumb{background:#fff;}
 </style>
 </head>
 <body>
@@ -441,6 +497,22 @@ body.light .cfg-hint{color:rgba(0,0,0,.4);}
     <div style="display:flex;gap:8px;width:100%;">
       <button class="share-btn" onclick="resetKeys()">기본값</button>
       <button class="share-btn primary" onclick="closeKeyCfg()">완료</button>
+    </div>
+  </div>
+</div>
+
+<div id="sync-modal">
+  <div class="cfg-box">
+    <div class="share-modal-label">TOUCH SYNC</div>
+    <div class="share-modal-title">싱크 측정</div>
+    <div class="cfg-hint" style="margin-top:2px;">「똑·똑」 소리에 맞춰 패드를 탭하세요</div>
+    <div class="cal-pad" id="cal-pad">TAP</div>
+    <div class="cal-stat"><span>탭<b id="cal-count">0</b></span><span>평균 오차<b id="cal-dev">--</b></span></div>
+    <div class="cal-result" id="cal-result">최소 4번 이상 탭하세요</div>
+    <div style="display:flex;gap:8px;width:100%;">
+      <button class="share-btn" onclick="calReset()">다시</button>
+      <button class="share-btn" id="cal-apply" onclick="calApply()" disabled>적용</button>
+      <button class="share-btn primary" onclick="closeSync()">닫기</button>
     </div>
   </div>
 </div>
@@ -520,7 +592,7 @@ body.light .cfg-hint{color:rgba(0,0,0,.4);}
       <div class="label" style="margin-top:16px;">MODE</div>
       <div class="opt-grid" id="q-mode-grid">
         <div class="opt sel" data-m="normal"><div class="ot">NORMAL</div><div class="os">차례대로</div></div>
-        <div class="opt" data-m="survival"><div class="ot">SURVIVAL</div><div class="os">60초 타임어택</div></div>
+        <div class="opt" data-m="survival"><div class="ot">SURVIVAL</div><div class="os">30초 타임어택</div></div>
       </div>
     </div>
     <button class="btn primary" onclick="qStart()"><span class="ico">▶</span> START_QUIZ</button>
@@ -678,6 +750,10 @@ body.light .cfg-hint{color:rgba(0,0,0,.4);}
       </div>
       <div class="label" style="margin-top:16px;">NOTE SPEED · <span id="r-speed-val">1.0x</span></div>
       <input id="r-speed" class="spd-slider" type="range" min="6" max="30" value="10" aria-label="note speed">
+      <div class="label" style="margin-top:16px;">TOUCH SYNC · <span id="r-offset-val">0ms</span></div>
+      <input id="r-offset" class="spd-slider" type="range" min="-150" max="150" step="5" value="0" aria-label="touch sync">
+      <div class="cfg-hint" style="text-align:left;margin-top:4px;">늦게 치는 편이면 − / 빨리 치는 편이면 + (판정 보정)</div>
+      <button class="btn ghost" style="margin-top:10px;" onclick="openSync()">⊹ 탭으로 싱크 측정</button>
     </div>
     <button class="btn ghost" onclick="openKeyCfg()">⚙ KEY CONFIG · 키 설정</button>
     <button class="btn primary" id="r-start" onclick="rStart()" disabled><span class="ico">▶</span> START</button>
@@ -695,6 +771,15 @@ body.light .cfg-hint{color:rgba(0,0,0,.4);}
     <div id="r-game-frame"><canvas id="r-canvas" width="460" height="620"></canvas>
       <div id="r-pause" class="pause-ov">
         <div class="pause-title">PAUSED</div>
+        <div class="pp-row">
+          <div class="pp-label"><span>NOTE SPEED</span><span class="pp-val" id="p-speed-val">1.0x</span></div>
+          <input id="p-speed" class="spd-slider" type="range" min="6" max="30" value="10" aria-label="note speed">
+        </div>
+        <div class="pp-row" style="margin-bottom:8px;">
+          <div class="pp-label"><span>TOUCH SYNC</span><span class="pp-val" id="p-offset-val">0ms</span></div>
+          <input id="p-offset" class="spd-slider" type="range" min="-150" max="150" step="5" value="0" aria-label="touch sync">
+        </div>
+        <button class="btn ghost" onclick="openSync()">⊹ 탭으로 싱크 측정</button>
         <button class="btn primary" onclick="rResume()"><span class="ico">▶</span> RESUME (ESC)</button>
         <button class="btn ghost" onclick="rRetry()">↻ RETRY</button>
         <button class="btn ghost" onclick="rQuit()">‹ QUIT</button>
@@ -1166,8 +1251,19 @@ document.getElementById('l-answer').addEventListener('keydown',e=>{ if(e.key==='
 // ═══════════════════════════════════════════════════════════
 const DIFF={ easy:{minGap:0.50,k:2.3,travel:2.10}, normal:{minGap:0.34,k:1.9,travel:1.70}, hard:{minGap:0.22,k:1.5,travel:1.35}, special:{minGap:0.13,k:1.05,travel:1.08} };
 let rSpeed=1.0; try{ const s=parseFloat(localStorage.getItem('arch_notespeed')); if(s>=0.6&&s<=3) rSpeed=s; }catch(e){}
+let rOffsetMs=0; try{ const o=parseFloat(localStorage.getItem('arch_offset')); if(o>=-150&&o<=150) rOffsetMs=o; }catch(e){}
 function rTravel(){ return DIFF[rDiff].travel / rSpeed; }
-function rSetSpeed(v){ rSpeed=Math.min(3,Math.max(0.6,v)); try{ localStorage.setItem('arch_notespeed',rSpeed); }catch(e){} const sl=document.getElementById('r-speed'); if(sl) sl.value=Math.round(rSpeed*10); const lbl=document.getElementById('r-speed-val'); if(lbl) lbl.textContent=rSpeed.toFixed(1)+'x'; }
+function rNow(){ return rPos() + rOffsetMs/1000; }
+function rSetSpeed(v){ rSpeed=Math.min(3,Math.max(0.6,v)); try{ localStorage.setItem('arch_notespeed',rSpeed); }catch(e){}
+  const r=Math.round(rSpeed*10), t=rSpeed.toFixed(1)+'x';
+  ['r-speed','p-speed'].forEach(id=>{ const s=document.getElementById(id); if(s)s.value=r; });
+  ['r-speed-val','p-speed-val'].forEach(id=>{ const l=document.getElementById(id); if(l)l.textContent=t; });
+}
+function rSetOffset(v){ rOffsetMs=Math.min(150,Math.max(-150,Math.round(v/5)*5)); try{ localStorage.setItem('arch_offset',rOffsetMs); }catch(e){}
+  const t=(rOffsetMs>0?'+':'')+rOffsetMs+'ms';
+  ['r-offset','p-offset'].forEach(id=>{ const s=document.getElementById(id); if(s)s.value=rOffsetMs; });
+  ['r-offset-val','p-offset-val'].forEach(id=>{ const l=document.getElementById(id); if(l)l.textContent=t; });
+}
 const LANES=4;
 let keyConfig=['ArrowLeft','ArrowDown','ArrowUp','ArrowRight'];
 try{ const sk=localStorage.getItem('arch_keys'); if(sk){ const a=JSON.parse(sk); if(Array.isArray(a)&&a.length===4) keyConfig=a; } }catch(e){}
@@ -1393,7 +1489,7 @@ function rDrawOverlay(){
 function rDrawStatic(){ rDrawField(); rDrawOverlay(); }
 function rLoop(){
   if(!rRunning) return;
-  const pos=rPos(), travel=rTravel();
+  const pos=rNow(), travel=rTravel();
   while(headIdx<notes.length && notes[headIdx].time<pos-W_MISS){ if(!notes[headIdx].hit) rMiss(); headIdx++; }
   rDrawField(); rDrawNotes(pos,travel); drawParticles(); rDrawOverlay();
   document.getElementById('r-prog').style.width=Math.min(100,Math.max(0,(pos/songDur)*100))+'%';
@@ -1404,7 +1500,7 @@ function rLoop(){
   rRaf=requestAnimationFrame(rLoop);
 }
 function rJudge(lane){
-  const pos=rPos(); let best=-1,bestDt=1e9;
+  const pos=rNow(); let best=-1,bestDt=1e9;
   for(let i=headIdx;i<notes.length;i++){ const n=notes[i]; if(n.time-pos>W_GOOD)break; if(n.hit||n.lane!==lane)continue; const dt=Math.abs(n.time-pos); if(dt<bestDt){bestDt=dt;best=i;} }
   if(best<0||bestDt>W_GOOD) return;
   notes[best].hit=true;
@@ -1493,6 +1589,32 @@ function resetKeys(){ keyConfig=['ArrowLeft','ArrowDown','ArrowUp','ArrowRight']
 function openKeyCfg(){ rebindLane=null; renderKeyCfg(); document.getElementById('keycfg-modal').classList.add('on'); }
 function closeKeyCfg(){ rebindLane=null; document.getElementById('keycfg-modal').classList.remove('on'); }
 document.getElementById('keycfg-modal').addEventListener('click',function(e){ if(e.target===this) closeKeyCfg(); });
+
+// ── TOUCH SYNC CALIBRATION ──
+let calCtx=null, calStart=0, calRunning=false, calRaf=null, calSchedInt=null, calSchedAhead=0, calTaps=[];
+const CAL_INT=0.6;
+function calClick(t){ try{ const o=calCtx.createOscillator(), g=calCtx.createGain(); o.type='square'; o.frequency.value=1150; o.connect(g); g.connect(calCtx.destination); g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.28,t+0.001); g.gain.exponentialRampToValueAtTime(0.0001,t+0.05); o.start(t); o.stop(t+0.07); }catch(e){} }
+function calSchedTick(){ if(!calRunning||!calCtx)return; const now=calCtx.currentTime; while(calStart+calSchedAhead*CAL_INT < now+0.25){ const bt=calStart+calSchedAhead*CAL_INT; if(bt>now+0.005) calClick(bt); calSchedAhead++; } }
+function calLoop(){ if(!calRunning||!calCtx)return; const pad=document.getElementById('cal-pad'); const phase=(((calCtx.currentTime-calStart)%CAL_INT)+CAL_INT)%CAL_INT/CAL_INT; pad.classList.toggle('flash', phase<0.13); calRaf=requestAnimationFrame(calLoop); }
+function openSync(){ try{ calCtx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ notify('오디오 미지원'); return; }
+  if(calCtx.state==='suspended') calCtx.resume();
+  calRunning=true; calTaps=[]; calSchedAhead=0; calStart=calCtx.currentTime+0.35;
+  clearInterval(calSchedInt); calSchedInt=setInterval(calSchedTick,25); cancelAnimationFrame(calRaf); calRaf=requestAnimationFrame(calLoop);
+  calUpdate(); document.getElementById('sync-modal').classList.add('on'); }
+function closeSync(){ calRunning=false; clearInterval(calSchedInt); cancelAnimationFrame(calRaf); try{ if(calCtx) calCtx.close(); }catch(e){} calCtx=null; document.getElementById('cal-pad').classList.remove('flash'); document.getElementById('sync-modal').classList.remove('on'); }
+function calTap(){ if(!calRunning||!calCtx)return; const t=calCtx.currentTime; const n=Math.round((t-calStart)/CAL_INT); if(n<0)return; const dev=t-(calStart+n*CAL_INT); if(Math.abs(dev)>CAL_INT*0.5)return; calTaps.push(dev); calUpdate(); const pad=document.getElementById('cal-pad'); pad.style.transform='scale(0.96)'; setTimeout(()=>pad.style.transform='',70); }
+function calMean(){ const arr=calTaps.slice(-16); if(!arr.length)return 0; return arr.reduce((a,b)=>a+b,0)/arr.length; }
+function calUpdate(){ const c=calTaps.length; document.getElementById('cal-count').textContent=c;
+  const meanMs=Math.round(calMean()*1000);
+  document.getElementById('cal-dev').textContent = c ? ((meanMs>0?'+':'')+meanMs+'ms') : '--';
+  const apply=document.getElementById('cal-apply'), res=document.getElementById('cal-result');
+  if(c>=4){ const off=Math.max(-150,Math.min(150,-meanMs)); apply.disabled=false; apply.dataset.off=off; res.textContent='추천 싱크  '+(off>0?'+':'')+off+'ms'; }
+  else { apply.disabled=true; res.textContent='최소 4번 이상 탭하세요'; }
+}
+function calReset(){ calTaps=[]; calSchedAhead=0; calStart=calCtx?calCtx.currentTime+0.35:0; calUpdate(); }
+function calApply(){ const off=parseInt(document.getElementById('cal-apply').dataset.off||'0',10); rSetOffset(off); notify('TOUCH SYNC '+(off>0?'+':'')+off+'ms 적용'); closeSync(); }
+(function(){ const pad=document.getElementById('cal-pad'); if(pad) pad.addEventListener('pointerdown',e=>{ e.preventDefault(); calTap(); }); 
+  const sm=document.getElementById('sync-modal'); if(sm) sm.addEventListener('click',function(e){ if(e.target===this) closeSync(); }); })();
 
 // ═══════════════════════════════════════════════════════════
 //  RESULT CAPTURE / SHARE
@@ -1616,7 +1738,10 @@ setInterval(()=>{document.getElementById('clock').textContent=new Date().toLocal
 
 document.getElementById('vol-slider').addEventListener('input',e=>setVolume(parseInt(e.target.value,10)/100));
 document.getElementById('r-speed').addEventListener('input',e=>rSetSpeed(parseInt(e.target.value,10)/10));
-window.onload=async()=>{ if(document.fonts&&document.fonts.ready)await document.fonts.ready; setVolume(volume); rSetSpeed(rSpeed); rRenderKeyGuide(); initProfile(); notify('SOUND SYSTEM ONLINE · '+SONGS.length+' TRACKS'); };
+document.getElementById('r-offset').addEventListener('input',e=>rSetOffset(parseInt(e.target.value,10)));
+document.getElementById('p-speed').addEventListener('input',e=>rSetSpeed(parseInt(e.target.value,10)/10));
+document.getElementById('p-offset').addEventListener('input',e=>rSetOffset(parseInt(e.target.value,10)));
+window.onload=async()=>{ if(document.fonts&&document.fonts.ready)await document.fonts.ready; setVolume(volume); rSetSpeed(rSpeed); rSetOffset(rOffsetMs); rRenderKeyGuide(); initProfile(); notify('SOUND SYSTEM ONLINE · '+SONGS.length+' TRACKS'); };
 </script>
 </body>
 </html>
