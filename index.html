@@ -523,7 +523,7 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
     <div class="backbar"><button class="back-btn" onclick="goHome()">‹ HOME</button></div>
     <div class="eyebrow">// RHYTHM · AUTO-BEATMAP</div>
     <div class="title-big" style="font-size:26px;">RHYTHM</div>
-    <div class="keyguide" id="r-keyguide"><span><b>←</b><b>↓</b><b>SPACE</b><b>↑</b><b>→</b></span></div>
+    <div class="keyguide" id="r-keyguide"><span><b>←</b><b>↓</b><b>↑</b><b>→</b></span></div>
     <div class="box">
       <div class="label">SELECT TRACK</div>
       <input id="r-search" class="r-search" type="text" placeholder="🔍 곡 제목 · 캐릭터 검색..." autocomplete="off">
@@ -1019,7 +1019,7 @@ let keyConfig=['ArrowLeft','ArrowDown','ArrowUp','ArrowRight'];
 try{ const sk=localStorage.getItem('arch_keys'); if(sk){ const a=JSON.parse(sk); if(Array.isArray(a)&&a.length===4) keyConfig=a; } }catch(e){}
 let rebindLane=null;
 function laneForKey(k){ if(k==='Spacebar')k=' '; const i=keyConfig.indexOf(k); return i>=0?i:undefined; }
-function keyLabel(k){ const map={' ':'SPACE','Spacebar':'SPACE','ArrowLeft':'←','ArrowDown':'↓','ArrowUp':'↑','ArrowRight':'→','Escape':'ESC','Enter':'ENTER'}; if(map[k])return map[k]; return k.length===1?k.toUpperCase():k; }
+function keyLabel(k){ if(k==null)return '—'; const map={' ':'SPACE','Spacebar':'SPACE','ArrowLeft':'←','ArrowDown':'↓','ArrowUp':'↑','ArrowRight':'→','Escape':'ESC','Enter':'ENTER'}; if(map[k])return map[k]; return k.length===1?k.toUpperCase():k; }
 const LANE_SYM=['◀','▼','▲','▶'];
 const W_PERFECT=0.06, W_GOOD=0.15, W_MISS=0.20;
 
@@ -1320,7 +1320,7 @@ function rRenderKeyGuide(){
 }
 function renderKeyCfg(){
   const el=document.getElementById('keycfg-rows'); el.innerHTML='';
-  for(let i=0;i<5;i++){
+  for(let i=0;i<LANES;i++){
     const row=document.createElement('div'); row.className='keycfg-row';
     row.innerHTML='<span class="kc-sym">'+LANE_SYM[i]+'</span><span class="kc-key" id="kc-key-'+i+'">'+keyLabel(keyConfig[i])+'</span>';
     const b=document.createElement('button'); b.className='kc-btn'; b.textContent='변경'; b.onclick=()=>startRebind(i);
