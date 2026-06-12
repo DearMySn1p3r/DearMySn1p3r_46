@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>「ARCH」 SOUND SYSTEM</title>
+<link rel="icon" type="image/png" href="「ARCH」 Symbol Logo Black Ver.png">
+<link rel="apple-touch-icon" href="「ARCH」 Symbol Logo Black Ver.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@300;500;700&display=swap" rel="stylesheet">
@@ -273,6 +275,142 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 }
 
 @media(max-width:560px){header{padding:0 12px;}.hdr-title{font-size:15px;}.hdr-sub{display:none;}.title-big{font-size:24px;}.answer-row{flex-direction:column;}.answer-row .btn{flex:1;}.thumb-wrap{width:200px;height:200px;}#vol-slider{width:54px;}.hdr-right{font-size:9px;}}
+#theme-toggle{margin-left:6px;padding:5px 11px;background:transparent;border:1px solid rgba(255,255,255,.35);color:rgba(255,255,255,.75);font-family:var(--font);font-size:9px;letter-spacing:2px;font-weight:700;transition:.2s;cursor:none !important;}
+#theme-toggle:hover{background:#fff;color:#000;box-shadow:0 0 14px rgba(127,127,127,.4);}
+@media(pointer:coarse){#theme-toggle{cursor:pointer !important;}}
+
+/* ════════ LIGHT MODE ════════ */
+body{transition:background .3s,color .3s;}
+body.light{background:#f4f4f6;color:#111;}
+body.light ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.3);}
+body.light #cursor{border-color:#000;box-shadow:0 0 12px rgba(0,0,0,.3);}
+body.light #cursor::before,body.light #cursor::after{background:#000;}
+body.light .scanline{background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.022) 2px,rgba(0,0,0,.022) 4px);}
+
+/* header */
+body.light header{background:rgba(255,255,255,.96);border-bottom-color:rgba(0,0,0,.18);box-shadow:0 0 30px rgba(0,0,0,.05);}
+body.light .hdr-title{text-shadow:0 0 18px rgba(0,0,0,.25);}
+body.light .hdr-sub{color:rgba(0,0,0,.4);}
+body.light .hdr-right{color:rgba(0,0,0,.5);}
+body.light .hdr-right span{color:#000;}
+body.light #theme-toggle{border-color:rgba(0,0,0,.3);color:rgba(0,0,0,.7);}
+body.light #theme-toggle:hover{background:#000;color:#fff;box-shadow:0 0 14px rgba(0,0,0,.3);}
+body.light .vol-ico{color:rgba(0,0,0,.65);}
+body.light #vol-slider,body.light .spd-slider{background:rgba(0,0,0,.25);}
+body.light #vol-slider::-webkit-slider-thumb,body.light .spd-slider::-webkit-slider-thumb{background:#000;box-shadow:0 0 8px rgba(0,0,0,.4);}
+body.light #vol-slider::-moz-range-thumb,body.light .spd-slider::-moz-range-thumb{background:#000;box-shadow:0 0 8px rgba(0,0,0,.4);}
+
+/* boxes / cards / panels */
+body.light .box{border-color:rgba(0,0,0,.15);background:rgba(0,0,0,.025);}
+body.light .box::after,body.light .mode-card::after,body.light .lyrics-box::after{background:linear-gradient(90deg,transparent,rgba(0,0,0,.4),transparent);}
+body.light .label,body.light .eyebrow{color:rgba(0,0,0,.45);}
+body.light .title-big{text-shadow:0 0 28px rgba(0,0,0,.2);}
+body.light .mode-card{border-color:rgba(0,0,0,.2);background:rgba(0,0,0,.02);}
+body.light .mode-card:hover{background:rgba(0,0,0,.05);border-color:#000;box-shadow:0 0 26px rgba(0,0,0,.12);}
+body.light .mode-ico{text-shadow:0 0 20px rgba(0,0,0,.3);}
+body.light .mode-desc{color:rgba(0,0,0,.5);}
+body.light .home-foot{color:rgba(0,0,0,.4);}
+
+/* buttons */
+body.light .btn{border-color:rgba(0,0,0,.45);color:rgba(0,0,0,.8);box-shadow:0 0 10px rgba(0,0,0,.04);}
+body.light .btn::before{background:linear-gradient(90deg,transparent,rgba(0,0,0,.2),transparent);}
+body.light .btn:hover{background:#000;color:#fff;border-color:#000;box-shadow:0 0 22px rgba(0,0,0,.35);}
+body.light .btn.primary{border-color:#000;color:#000;}
+body.light .back-btn{color:rgba(0,0,0,.5);border-color:rgba(0,0,0,.2);}
+body.light .back-btn:hover{color:#000;border-color:#000;}
+
+/* options / stats */
+body.light .opt{border-color:rgba(0,0,0,.2);background:rgba(0,0,0,.03);}
+body.light .opt .os{color:rgba(0,0,0,.45);}
+body.light .opt.sel{border-color:#000;background:rgba(0,0,0,.06);box-shadow:0 0 14px rgba(0,0,0,.12);}
+body.light .start-desc{color:rgba(0,0,0,.6);}
+body.light .stat{border-color:rgba(0,0,0,.16);background:rgba(0,0,0,.02);}
+body.light .stat .sl{color:rgba(0,0,0,.45);}
+body.light .stat .sv{text-shadow:0 0 12px rgba(0,0,0,.2);}
+
+/* quiz thumb / reveal */
+body.light .thumb-wrap{border-color:rgba(0,0,0,.35);box-shadow:0 0 35px rgba(0,0,0,.08),inset 0 0 50px rgba(0,0,0,.04);}
+body.light .ring{border-color:rgba(0,0,0,.18);}
+body.light .ring span{color:rgba(0,0,0,.5);text-shadow:0 0 20px rgba(0,0,0,.25);}
+body.light .thumb-now{color:rgba(0,0,0,.45);}
+body.light .ri-title{text-shadow:0 0 14px rgba(0,0,0,.25);}
+body.light .ri-char{color:rgba(0,0,0,.55);}
+body.light .clip-meta{color:rgba(0,0,0,.4);}
+
+/* progress bars (white→dark) */
+body.light .progress{border-color:rgba(0,0,0,.25);background:rgba(0,0,0,.04);}
+body.light .progress-fill{background:repeating-linear-gradient(90deg,#000,#000 8px,rgba(0,0,0,.6) 8px,rgba(0,0,0,.6) 16px);box-shadow:0 0 14px rgba(0,0,0,.3);}
+body.light .hp-wrap{border-color:rgba(0,0,0,.25);}
+body.light .hp-fill{background:#000;box-shadow:0 0 12px rgba(0,0,0,.4);}
+body.light .song-prog{background:rgba(0,0,0,.1);}
+body.light .song-prog-fill{background:rgba(0,0,0,.5);}
+
+/* inputs */
+body.light #q-answer,body.light #l-answer,body.light .r-search{background:#fff;border-color:rgba(0,0,0,.25);color:#000;}
+body.light #q-answer::placeholder,body.light #l-answer::placeholder,body.light .r-search::placeholder{color:rgba(0,0,0,.3);}
+body.light #q-answer:focus,body.light #l-answer:focus,body.light .r-search:focus{border-color:rgba(0,0,0,.7);box-shadow:0 0 14px rgba(0,0,0,.12);}
+body.light #q-answer.ok,body.light #l-answer.ok{border-color:#000;box-shadow:0 0 18px rgba(0,0,0,.3);}
+
+/* feedback / results */
+body.light .feedback.ok{color:#000;text-shadow:0 0 12px rgba(0,0,0,.3);}
+body.light .feedback.no{color:rgba(0,0,0,.5);}
+body.light .res-row{border-color:rgba(0,0,0,.12);}
+body.light .res-row.hit{border-color:rgba(0,0,0,.4);}
+body.light .res-row.hit .rmark{color:#000;text-shadow:0 0 8px rgba(0,0,0,.4);}
+body.light .res-row .rc{color:rgba(0,0,0,.45);}
+body.light .res-score,body.light .res-rank{text-shadow:0 0 28px rgba(0,0,0,.25);}
+body.light .res-sub{color:rgba(0,0,0,.5);}
+body.light .res-cell{border-color:rgba(0,0,0,.14);}
+body.light .res-cell .rl{color:rgba(0,0,0,.45);}
+
+/* rhythm song list */
+body.light .song-item{border-color:rgba(0,0,0,.14);background:rgba(0,0,0,.015);}
+body.light .song-item:hover{border-color:rgba(0,0,0,.4);background:rgba(0,0,0,.05);}
+body.light .song-item.sel{border-color:#000;box-shadow:0 0 12px rgba(0,0,0,.15);background:rgba(0,0,0,.06);}
+body.light .song-item .idx{color:rgba(0,0,0,.35);}
+body.light .song-item .ch{color:rgba(0,0,0,.45);}
+body.light .song-item .lvf{color:rgba(0,0,0,.9);}
+body.light .song-item .lve{color:rgba(0,0,0,.18);}
+body.light .keyguide{color:rgba(0,0,0,.5);}
+body.light .keyguide b{color:#000;border-color:rgba(0,0,0,.3);}
+body.light .game-top{color:rgba(0,0,0,.6);}
+body.light .game-top .song-nm{color:#000;}
+body.light .r-pause-btn{border-color:rgba(0,0,0,.35);background:rgba(0,0,0,.04);color:#000;}
+body.light .r-pause-btn:hover{background:#000;color:#fff;box-shadow:0 0 12px rgba(0,0,0,.4);}
+body.light .load-ring{border-color:rgba(0,0,0,.15);border-top-color:#000;}
+body.light .load-txt{color:rgba(0,0,0,.6);}
+
+/* equalizer bars */
+body.light .eq span{background:#000;box-shadow:0 0 8px rgba(0,0,0,.4);}
+
+/* lyrics */
+body.light .lyrics-box{border-color:rgba(0,0,0,.22);background:rgba(0,0,0,.02);}
+body.light .lyrics-text{color:rgba(0,0,0,.9);}
+body.light .lyrics-sec{color:rgba(0,0,0,.4);}
+body.light .lyrics-more{color:rgba(0,0,0,.35);}
+body.light .reveal-thumb{border-color:rgba(0,0,0,.35);box-shadow:0 0 16px rgba(0,0,0,.12);}
+
+/* notif */
+body.light #notif{background:rgba(17,17,17,.96);color:#fff;border-left-color:#fff;box-shadow:0 8px 28px rgba(0,0,0,.2);}
+
+/* share & keycfg modals */
+body.light #share-modal,body.light #keycfg-modal{background:rgba(0,0,0,.55);}
+body.light .share-box,body.light .cfg-box{border-color:rgba(0,0,0,.5);background:#fff;}
+body.light .share-box::before,body.light .cfg-box::before{background:linear-gradient(90deg,transparent,#000,transparent);}
+body.light .share-modal-label{color:rgba(0,0,0,.5);}
+body.light .share-modal-title{text-shadow:0 0 15px rgba(0,0,0,.25);}
+body.light #share-preview{border-color:rgba(0,0,0,.2);box-shadow:0 0 20px rgba(0,0,0,.06);}
+body.light .share-btn{border-color:rgba(0,0,0,.4);color:rgba(0,0,0,.8);}
+body.light .share-btn.primary{border-color:#000;color:#000;box-shadow:0 0 12px rgba(0,0,0,.12);}
+body.light .share-btn:hover{background:#000;color:#fff;box-shadow:0 0 20px rgba(0,0,0,.4);}
+body.light .share-close{color:rgba(0,0,0,.4);}
+body.light .share-close:hover{color:#000;}
+body.light .keycfg-row{border-color:rgba(0,0,0,.16);background:rgba(0,0,0,.02);}
+body.light .kc-key{color:#000;border-color:rgba(0,0,0,.2);}
+body.light .kc-key.await{color:#fff;background:#000;box-shadow:0 0 14px rgba(0,0,0,.4);}
+body.light .kc-btn{border-color:rgba(0,0,0,.4);color:rgba(0,0,0,.8);}
+body.light .kc-btn:hover{background:#000;color:#fff;}
+body.light .cfg-hint{color:rgba(0,0,0,.4);}
 </style>
 </head>
 <body>
@@ -308,7 +446,7 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 </div>
 
 <header>
-  <div class="hdr-left" onclick="goHome()"><div class="hdr-title">「ARCH」</div><div class="hdr-sub">| SOUND_SYSTEM</div></div>
+  <div class="hdr-left" onclick="goHome()"><div class="hdr-title">「ARCH」</div><div class="hdr-sub">| SOUND_SYSTEM</div><button id="theme-toggle" onclick="event.stopPropagation();toggleTheme()">◐ <span id="theme-label">LIGHT</span></button></div>
   <div class="vol-ctrl">
     <span class="vol-ico" id="vol-ico" onclick="toggleMute()">🔊</span>
     <input type="range" id="vol-slider" min="0" max="100" value="80" aria-label="volume">
@@ -596,6 +734,22 @@ header{position:fixed;top:0;left:0;right:0;height:58px;border-bottom:1px solid r
 </div>
 
 <script>
+// ── THEME (LIGHT/DARK) ──
+let lightMode = false;
+try { lightMode = localStorage.getItem('arch_sound_theme') === 'light'; } catch(e){}
+function applyTheme(){
+  document.body.classList.toggle('light', lightMode);
+  const lbl = document.getElementById('theme-label');
+  if (lbl) lbl.textContent = lightMode ? 'DARK' : 'LIGHT';
+}
+function toggleTheme(){
+  lightMode = !lightMode;
+  try { localStorage.setItem('arch_sound_theme', lightMode ? 'light' : 'dark'); } catch(e){}
+  applyTheme();
+  if (typeof notify === 'function') notify(lightMode ? 'LIGHT_MODE_ENGAGED' : 'DARK_MODE_ENGAGED');
+}
+applyTheme();
+
 // ═══════════════════════════════════════════════════════════
 //  CONFIG  ▼▼▼ 본인 환경 ▼▼▼
 // ═══════════════════════════════════════════════════════════
