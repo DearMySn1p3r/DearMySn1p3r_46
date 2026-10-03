@@ -2187,11 +2187,14 @@ const ACH_META={
 };
 const ACH_G={RHYTHM:'R',QUIZ:'Q',LYRICS:'L',SYSTEM:'S'};
 (function(){const cnt={};ACHS.forEach(a=>{const m=ACH_META[a.id];if(!m)return;Object.assign(a,m);cnt[m.g]=(cnt[m.g]||0)+1;a.code=ACH_G[m.g]+'-'+String(cnt[m.g]).padStart(2,'0');});})();
+let achQ=[],achQT=null;
+function achQueue(def){achQ.push(def);if(!achQT)achNext();}
+function achNext(){const d=achQ.shift();if(!d){achQT=null;return;}toast('ACHIEVEMENT UNLOCKED · '+d.code+' '+d.name);if(!achQT)flash();achQT=setTimeout(achNext,1700);}
 let achTime={};try{achTime=JSON.parse(localStorage.getItem('arch_ach_t')||'{}')||{};}catch(e){}
 const _unlockBase=unlockAch;
 unlockAch=function(id){if(achSet.has(id))return;const def=ACHS.find(x=>x.id===id);if(!def)return;achSet.add(id);achTime[id]=Date.now();
   try{localStorage.setItem('arch_ach',JSON.stringify([...achSet]));localStorage.setItem('arch_ach_t',JSON.stringify(achTime));}catch(e){}
-  renderBadges();toast('ACHIEVEMENT UNLOCKED · '+def.code+' '+def.name);flash();if($('screen-ach').classList.contains('on'))renderAchList();};
+  renderBadges();achQueue(def);if($('screen-ach').classList.contains('on'))renderAchList();};
 function renderBadges(){const el=$('badges');if(!el)return;
   el.innerHTML=`<span class="badge count" onclick="openAch()" title="업적 보기"><i style="width:${Math.round(achSet.size/ACHS.length*100)}%"></i><em>${achSet.size}/${ACHS.length}</em></span>`;}
 function renderAchList(){
