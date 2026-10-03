@@ -354,16 +354,27 @@ body.ready #app{transition:opacity .8s var(--ease) .4s}
 #r-game{max-width:460px;align-items:stretch}
 #r-game-frame{position:relative;width:100%}
 #r-canvas{display:block;width:100%;height:auto;aspect-ratio:460/620;border:1px solid var(--hl2);background:#000;touch-action:none}
-.game-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.game-top .song-nm{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-.game-top .lbl b{color:#fff;font-weight:500;margin-left:6px}
+.game-top{display:flex;justify-content:space-between;align-items:flex-end;gap:14px}
+.gt-l{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1}
+.gt-l .lbl{font-size:8.5px}
+.game-top .song-nm{font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;letter-spacing:.01em}
+.gt-score{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.gt-score .lbl{font-size:8.5px}
+.gt-score b{font:300 17px/1 var(--sans);font-variant-numeric:tabular-nums;color:#fff;min-width:70px;text-align:right}
 .r-pause-btn{flex-shrink:0;width:34px;height:26px;border:1px solid var(--hl2);display:flex;align-items:center;justify-content:center;gap:4px;transition:.15s}
 .r-pause-btn i{width:2px;height:10px;background:currentColor}
 .r-pause-btn:hover{background:#fff;color:#000;border-color:#fff}
-.hp-wrap{height:2px;background:var(--hl2);position:relative;overflow:hidden}
-.hp-fill{position:absolute;left:0;top:0;bottom:0;width:100%;background:#fff;transition:width .15s}
-.song-prog{height:1px;background:var(--hl);position:relative;margin-top:-6px}
+.r-meters{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.r-meter{display:grid;grid-template-columns:auto minmax(0,1fr) 38px;align-items:center;gap:10px}
+.r-meter .lbl{font-size:8.5px}
+.r-mv{font:400 9.5px var(--mono);letter-spacing:.06em;color:var(--t2);text-align:right;font-variant-numeric:tabular-nums}
+.hp-wrap,.song-prog{height:1px;background:var(--hl2);position:relative;overflow:visible}
+.hp-fill{position:absolute;left:0;top:-1px;height:3px;width:100%;background:#fff;transition:width .15s}
+.hp-wrap.low .hp-fill{background:#ff6e60}
 .song-prog-fill{position:absolute;left:0;top:0;bottom:0;width:0;background:var(--t2)}
+.song-prog-fill::after{content:'';position:absolute;right:-2px;top:-2px;width:5px;height:5px;background:#fff}
+.r-quit{align-self:center;margin-top:2px}
+#r-canvas{border-color:var(--hl)}
 #r-load{align-items:center;gap:18px;padding:60px 0}
 .load-ring{width:56px;height:56px;border:1px solid var(--hl2);border-top-color:#fff;border-radius:50%;animation:spin 1s linear infinite}
 .pause-ov{position:absolute;inset:0;background:rgba(0,0,0,.86);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:5;padding:20px}
@@ -391,15 +402,50 @@ body.ready #app{transition:opacity .8s var(--ease) .4s}
 .res-cell .rl{font:500 9px var(--mono);letter-spacing:.16em;color:var(--t3);text-transform:uppercase}
 .res-cell .rv{font:400 13px var(--sans);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* achievements */
-.ach-list{display:flex;flex-direction:column;gap:4px}
-.ach-item{display:grid;grid-template-columns:34px minmax(0,1fr) auto;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--hl)}
-.ach-item.off{opacity:.45}
-.ach-dot{width:34px;height:34px;border:1px solid var(--hl2);display:flex;align-items:center;justify-content:center;font:500 13px var(--mono);color:var(--t3)}
-.ach-item.on .ach-dot{background:#fff;color:#000;border-color:#fff}
-.ach-name{font-size:13px;font-weight:500}
-.ach-desc{font-size:11px;color:var(--t3);margin-top:3px}
-.ach-status{font:500 8.5px var(--mono);letter-spacing:.16em;color:var(--t4)}
-.ach-item.on .ach-status{color:#fff}
+#screen-ach{max-width:620px}
+.ach-list{display:flex;flex-direction:column;gap:10px}
+.ach-sum{display:grid;grid-template-columns:auto minmax(0,1fr);gap:22px;align-items:center;border:1px solid var(--hl);background:#040404;padding:16px 18px}
+.ach-sum-n{display:flex;align-items:baseline;gap:6px}
+.ach-sum-n b{font:200 38px/1 var(--sans);font-variant-numeric:tabular-nums}
+.ach-sum-n span{font:400 11px var(--mono);color:var(--t3)}
+.ach-sum-r{display:flex;flex-direction:column;gap:8px;min-width:0}
+.ach-sum-l{display:flex;justify-content:space-between}
+.ach-bar{height:1px;background:var(--hl2);position:relative}
+.ach-bar i{position:absolute;left:0;top:-1px;height:3px;background:#fff;transition:width .6s var(--ease)}
+.ach-segs{display:flex;gap:14px;flex-wrap:wrap}
+.ach-segs span{font:400 9.5px var(--mono);color:var(--t2);letter-spacing:.06em}
+.ach-segs em{font-style:normal;color:var(--t4);letter-spacing:.16em;margin-right:6px;font-size:8.5px}
+.ach-gh{display:flex;align-items:center;gap:10px;margin-top:8px}
+.ach-gh i{flex:1;height:1px;background:var(--hl)}
+.ach-gh .lbl{font-size:8.5px}
+.ach-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.ach-card{position:relative;border:1px solid var(--hl);background:#030303;padding:11px 13px 12px;display:flex;flex-direction:column;gap:5px;min-height:86px;transition:border-color .2s}
+.ach-card .ach-nm{font-size:13px;font-weight:500;color:var(--t3)}
+.ach-card .ach-ds{font-size:11px;line-height:1.5;color:var(--t4);word-break:keep-all}
+.ach-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.ach-code{font:500 9px var(--mono);letter-spacing:.14em;color:var(--t4)}
+.ach-st{display:flex;align-items:center;gap:6px;font:500 8px var(--mono);letter-spacing:.16em;color:var(--t4)}
+.ach-st i{display:block}
+.ach-st .lk{width:7px;height:6px;border:1px solid currentColor;position:relative;margin-top:3px}
+.ach-st .lk::before{content:'';position:absolute;left:0;top:-5px;width:3px;height:4px;border:1px solid currentColor;border-bottom:none;border-radius:3px 3px 0 0}
+.ach-st .ck{width:8px;height:4px;border-left:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(-45deg);margin-top:-2px}
+.ach-dt{font:400 9px var(--mono);color:var(--t3);letter-spacing:.06em;margin-top:auto;padding-top:4px}
+.ach-card.on{border-color:rgba(255,255,255,.32);background:#070707}
+.ach-card.on::before{content:'';position:absolute;left:-1px;top:-1px;width:10px;height:10px;border-left:1px solid #fff;border-top:1px solid #fff}
+.ach-card.on::after{content:'';position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-right:1px solid #fff;border-bottom:1px solid #fff}
+.ach-card.on .ach-nm{color:#fff}.ach-card.on .ach-ds{color:var(--t2)}.ach-card.on .ach-code{color:var(--t2)}.ach-card.on .ach-st{color:#fff}
+@media (max-width:420px){.ach-grid{grid-template-columns:1fr}.ach-card{min-height:0}.ach-sum{gap:16px;padding:14px}.ach-sum-n b{font-size:30px}}
+/* home badge = achievement meter */
+.badge.count{width:auto;min-width:64px;height:22px;padding:0 9px;position:relative;overflow:hidden;cursor:pointer;color:var(--t2)}
+.badge.count i{position:absolute;left:0;bottom:0;height:1px;background:#fff}
+.badge.count em{font-style:normal;font:500 9.5px var(--mono);letter-spacing:.08em;position:relative}
+.badge.count:hover{border-color:#fff;color:#fff}
+/* lyrics lines */
+.lyrics-text{white-space:normal;margin-top:12px;font:400 14px/1.85 var(--sans);display:flex;flex-direction:column}
+.ly{display:grid;grid-template-columns:22px minmax(0,1fr);gap:12px;align-items:baseline}
+.ly.gap{height:10px}
+.ly-n{font:400 9px var(--mono);color:var(--t4);letter-spacing:.06em;text-align:right}
+.ly-t{word-break:keep-all;overflow-wrap:anywhere}
 /* header volume */
 .vol-ctrl{gap:8px}
 .vol-ico{width:20px;height:20px;display:flex;align-items:center;justify-content:center;color:var(--t2);transition:color .2s}
@@ -453,6 +499,19 @@ body.ready #app{transition:opacity .8s var(--ease) .4s}
 /* clip header scan line (mobile zoom-out fix) */
 header{overflow:hidden}
 html,body{overflow-x:hidden;max-width:100%}
+#ach-prog{display:none}
+/* touch pads · bracket style */
+.r-touch{gap:6px}
+.r-touch-btn{height:62px;border:1px solid var(--hl);position:relative;background:#030303}
+.r-touch-btn::before{content:'';width:9px;height:9px;background:none;clip-path:none;border-left:1px solid rgba(255,255,255,.7);border-bottom:1px solid rgba(255,255,255,.7);transform:rotate(45deg);margin-left:4px}
+.r-touch-btn[data-lane="1"]::before{transform:rotate(-45deg);margin:-5px 0 0}
+.r-touch-btn[data-lane="2"]::before{transform:rotate(135deg);margin:5px 0 0}
+.r-touch-btn[data-lane="3"]::before{transform:rotate(-135deg);margin:0 4px 0 0}
+.r-touch-btn::after{content:'';position:absolute;inset:5px;background:linear-gradient(#fff,#fff) left top/6px 1px,linear-gradient(#fff,#fff) left top/1px 6px,linear-gradient(#fff,#fff) right top/6px 1px,linear-gradient(#fff,#fff) right top/1px 6px,linear-gradient(#fff,#fff) left bottom/6px 1px,linear-gradient(#fff,#fff) left bottom/1px 6px,linear-gradient(#fff,#fff) right bottom/6px 1px,linear-gradient(#fff,#fff) right bottom/1px 6px;background-repeat:no-repeat;opacity:.3;pointer-events:none}
+.r-touch-btn.active{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.5)}
+.r-touch-btn.active::before{background:none;border-color:#fff}
+.r-touch-btn.active::after{opacity:1}
+.reveal-info:empty{display:none}
 #savePv{position:fixed;inset:0;z-index:46000;display:grid;place-items:center;background:rgba(0,0,0,.82);opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;padding:20px}
 #savePv.on{opacity:1;visibility:visible}
 .sp{width:min(420px,100%);max-height:calc(100dvh - 40px);overflow-y:auto;background:#070707;border:1px solid var(--hl2);padding:16px}
@@ -562,10 +621,10 @@ html,body{overflow-x:hidden;max-width:100%}
         <span class="mc-n">03</span>
         <svg class="mode-ico" viewBox="0 0 24 24"><path d="M5 3v18M10 3v18M14 3v18M19 3v18"/><path d="M3 8h4M12 12h4M8 16h4M17 6h4" stroke-width="2.2"/></svg>
         <span class="mode-name">RHYTHM</span>
-        <span class="mode-desc">파형 자동 채보 · 게임 사이즈 1분 30초</span>
+        <span class="mode-desc">파형 자동 채보 · 1분 30초 컷</span>
       </button>
     </div>
-    <button class="btn" style="max-width:420px" onclick="openAch()">업적 보기 · Achievements</button>
+    <button class="btn" onclick="openAch()">업적 보기</button>
     <div class="home-foot lbl" id="home-foot">TRACKS: 28 · WAVEFORM SYNC ENGINE</div>
   </div>
 
@@ -765,7 +824,7 @@ html,body{overflow-x:hidden;max-width:100%}
 
   <!-- RHYTHM GAME -->
   <div class="screen" id="r-game">
-    <div class="game-top"><span class="song-nm" id="r-song">—</span><span class="lbl">Score <b id="r-score">0</b></span><button class="r-pause-btn" onclick="rTogglePause()" aria-label="pause"><i></i><i></i></button></div>
+    <div class="game-top"><div class="gt-l"><span class="lbl" id="r-diff-l">Normal</span><span class="song-nm" id="r-song">—</span></div><span class="gt-score"><span class="lbl">Score</span><b id="r-score">0</b></span><button class="r-pause-btn" onclick="rTogglePause()" aria-label="pause"><i></i><i></i></button></div>
     <div id="r-game-frame"><canvas id="r-canvas" width="460" height="620"></canvas>
       <div id="r-pause" class="pause-ov">
         <span class="lbl">Paused</span>
@@ -782,15 +841,17 @@ html,body{overflow-x:hidden;max-width:100%}
         <div class="btns c3"><button class="btn sm nx" onclick="openSync()">싱크</button><button class="btn sm nx" onclick="rRetry()">재시작</button><button class="btn sm nx" onclick="rQuit()">나가기</button></div>
       </div>
     </div>
-    <div class="hp-wrap"><div class="hp-fill" id="r-hp"></div></div>
-    <div class="song-prog"><div class="song-prog-fill" id="r-prog"></div></div>
+    <div class="r-meters">
+      <div class="r-meter"><span class="lbl">Sync</span><div class="hp-wrap"><div class="hp-fill" id="r-hp"></div></div><span class="r-mv" id="r-hp-v">100</span></div>
+      <div class="r-meter"><span class="lbl">Track</span><div class="song-prog"><div class="song-prog-fill" id="r-prog"></div></div><span class="r-mv" id="r-time">0:00</span></div>
+    </div>
     <div class="r-touch" id="r-touch">
       <div class="r-touch-btn" data-lane="0"></div>
       <div class="r-touch-btn" data-lane="1"></div>
       <div class="r-touch-btn" data-lane="2"></div>
       <div class="r-touch-btn" data-lane="3"></div>
     </div>
-    <button class="btn sm nx" style="max-width:460px" onclick="rQuit()">나가기</button>
+    <button class="r-quit back-btn" onclick="rQuit()">← 나가기</button>
   </div>
 
   <!-- RHYTHM RESULT -->
@@ -1849,7 +1910,7 @@ function rStopAll(){rRunning=false;rActive=false;rPaused=false;analyser=null;cle
 function rCountdown(song){
   clearInterval(rCdInt);try{if(source)source.stop();}catch(e){}rRunning=false;cancelAnimationFrame(rRaf);
   rReset();analyser=null;rPaused=false;$('r-pause').classList.remove('on');
-  $('r-song').textContent=song.title;$('r-score').textContent='0';$('r-hp').style.width='100%';$('r-prog').style.width='0%';
+  $('r-song').textContent=song.title;$('r-score').textContent='0';$('r-hp').style.width='100%';$('r-prog').style.width='0%';$('r-hp-v').textContent='100';$('r-diff-l').textContent=rDiff;{const m=Math.floor(songDur/60),sc=Math.floor(songDur%60);$('r-time').textContent=m+':'+String(sc).padStart(2,'0');}
   $('hdr-mode').textContent=rDiff.toUpperCase();
   show('r-game');rSetupCanvas();rActive=true;
   cdVal=3;judgeText='3';judgeT=performance.now();
@@ -1862,7 +1923,8 @@ function rLoop(){
   while(headIdx<notes.length&&notes[headIdx].time<pos-W_MISS){if(!notes[headIdx].hit)rMiss();headIdx++;}
   rDrawField();rDrawNotes(pos,travel);drawParticles();rDrawOverlay();
   $('r-prog').style.width=Math.min(100,Math.max(0,(pos/songDur)*100))+'%';
-  $('r-hp').style.width=hp+'%';$('r-score').textContent=rScore;
+  $('r-hp').style.width=hp+'%';$('r-score').textContent=rScore;$('r-hp-v').textContent=Math.round(hp);
+  {const tl=Math.max(0,songDur-pos),m=Math.floor(tl/60),sc=Math.floor(tl%60);$('r-time').textContent='-'+m+':'+String(sc).padStart(2,'0');$('r-hp').parentNode.classList.toggle('low',hp<30);}
   if(pos>=songDur+.2||(headIdx>=notes.length&&pos>rLastNote+2.4)){rEnd(true);return;}
   if(hp<=0){rEnd(false);return;}
   rRaf=requestAnimationFrame(rLoop);
@@ -2017,6 +2079,142 @@ qPlay=function(randomize){
   }
   _qPlay(randomize);
 };
+
+/* ═════ RHYTHM RENDERER · cc line style ═════ */
+const RF_SANS='"Pretendard Variable",Pretendard,"Noto Sans KR",sans-serif',RF_MONO='"JetBrains Mono",ui-monospace,monospace';
+const spaced=t=>String(t).split('').join('  ');
+let rHits=[],rSpin=0;
+function rSetupCanvas(){dpr=Math.min(2,window.devicePixelRatio||1);const cssW=rcanvas.clientWidth||460,cssH=cssW*(620/460);rcanvas.width=Math.round(cssW*dpr);rcanvas.height=Math.round(cssH*dpr);CW=rcanvas.width;CH=rcanvas.height;LANE_W=CW/LANES;JUDGE_Y=CH*0.84;rctx.textAlign='center';rctx.textBaseline='middle';}
+function rGeom(){const nw=LANE_W*0.58,nh=Math.max(5*dpr,Math.round(LANE_W*0.07));return{nw,nh};}
+function rDrawBackground(){
+  const cx=CW/2,cy=CH*0.31,base=Math.min(CW,CH)*0.135;let pulse=0;
+  if(analyser&&freqData){analyser.getByteFrequencyData(freqData);let s=0;for(let i=0;i<freqData.length;i++)s+=freqData[i];pulse=(s/freqData.length)/255;}
+  const R=base*(1+pulse*0.06);rSpin+=0.0022+pulse*0.01;
+  // spectrum · thin radial ticks
+  if(analyser&&freqData){const N=72,n=freqData.length;rctx.lineWidth=1*dpr;
+    for(let i=0;i<N;i++){const k=i<N/2?i:N-1-i,v=freqData[Math.floor(k/(N/2)*n*0.7)]/255,a=(i/N)*Math.PI*2-Math.PI/2,r0=R*1.16,r1=r0+3*dpr+v*R*0.55;
+      rctx.strokeStyle='rgba(255,255,255,'+(0.07+v*0.38).toFixed(3)+')';rctx.beginPath();rctx.moveTo(cx+Math.cos(a)*r0,cy+Math.sin(a)*r0);rctx.lineTo(cx+Math.cos(a)*r1,cy+Math.sin(a)*r1);rctx.stroke();}}
+  // outer rotating dashed ring
+  rctx.save();rctx.translate(cx,cy);rctx.rotate(rSpin);rctx.strokeStyle='rgba(255,255,255,.09)';rctx.lineWidth=1*dpr;rctx.setLineDash([2*dpr,7*dpr]);rctx.beginPath();rctx.arc(0,0,R*1.95,0,Math.PI*2);rctx.stroke();rctx.setLineDash([]);
+  for(let i=0;i<4;i++){const a=i*Math.PI/2;rctx.strokeStyle='rgba(255,255,255,.28)';rctx.beginPath();rctx.arc(0,0,R*1.95,a-0.06,a+0.06);rctx.stroke();}
+  rctx.restore();
+  if(rThumbCanvas){rctx.save();rctx.globalAlpha=0.2+pulse*0.1;rctx.drawImage(rThumbCanvas,cx-R,cy-R,R*2,R*2);rctx.restore();}
+  rctx.strokeStyle='rgba(255,255,255,'+(0.22+pulse*0.35).toFixed(3)+')';rctx.lineWidth=1*dpr;rctx.beginPath();rctx.arc(cx,cy,R,0,Math.PI*2);rctx.stroke();
+}
+function rBrackets(x,y,w,h,l,col){rctx.strokeStyle=col;rctx.beginPath();
+  rctx.moveTo(x,y+l);rctx.lineTo(x,y);rctx.lineTo(x+l,y);rctx.moveTo(x+w-l,y);rctx.lineTo(x+w,y);rctx.lineTo(x+w,y+l);
+  rctx.moveTo(x+w,y+h-l);rctx.lineTo(x+w,y+h);rctx.lineTo(x+w-l,y+h);rctx.moveTo(x+l,y+h);rctx.lineTo(x,y+h);rctx.lineTo(x,y+h-l);rctx.stroke();}
+function rDrawField(){
+  rctx.clearRect(0,0,CW,CH);rDrawBackground();
+  const {nw,nh}=rGeom();
+  // lane dividers + ticks
+  rctx.lineWidth=1*dpr;rctx.strokeStyle='rgba(255,255,255,.06)';
+  for(let i=1;i<LANES;i++){const x=Math.round(i*LANE_W)+.5;rctx.beginPath();rctx.moveTo(x,0);rctx.lineTo(x,CH);rctx.stroke();}
+  rctx.fillStyle='rgba(255,255,255,.14)';for(let i=1;i<LANES;i++){for(let y=CH*0.1;y<JUDGE_Y-10*dpr;y+=CH*0.1)rctx.fillRect(Math.round(i*LANE_W)-2*dpr,y,5*dpr,1*dpr);}
+  // lane flash (from judge line upward)
+  for(let i=0;i<LANES;i++){if(laneFlash[i]>0){const g=rctx.createLinearGradient(0,JUDGE_Y,0,JUDGE_Y-CH*0.38);g.addColorStop(0,'rgba(255,255,255,'+(0.13*laneFlash[i]).toFixed(3)+')');g.addColorStop(1,'rgba(255,255,255,0)');rctx.fillStyle=g;rctx.fillRect(i*LANE_W,JUDGE_Y-CH*0.38,LANE_W,CH*0.38);laneFlash[i]-=0.07;if(laneFlash[i]<0)laneFlash[i]=0;}}
+  // judge line
+  const jg=rctx.createLinearGradient(0,0,CW,0);jg.addColorStop(0,'rgba(255,255,255,0)');jg.addColorStop(.12,'rgba(255,255,255,.45)');jg.addColorStop(.88,'rgba(255,255,255,.45)');jg.addColorStop(1,'rgba(255,255,255,0)');
+  rctx.fillStyle=jg;rctx.fillRect(0,Math.round(JUDGE_Y),CW,1*dpr);
+  // receptors
+  const ar=['←','↓','↑','→'];rctx.font='500 '+Math.round(10*dpr)+'px '+RF_MONO;
+  for(let i=0;i<LANES;i++){const cx=i*LANE_W+LANE_W/2,lit=keyDown[i]||laneFlash[i]>0.55,w=nw+10*dpr,h=nh+12*dpr;
+    if(lit){rctx.fillStyle='rgba(255,255,255,.10)';rctx.fillRect(cx-w/2,JUDGE_Y-h/2,w,h);}
+    rctx.lineWidth=1*dpr;rBrackets(cx-w/2,JUDGE_Y-h/2,w,h,5*dpr,lit?'rgba(255,255,255,.95)':'rgba(255,255,255,.38)');
+    rctx.fillStyle=lit?'rgba(255,255,255,.9)':'rgba(255,255,255,.28)';rctx.fillText(ar[i],cx,JUDGE_Y+h/2+12*dpr);}
+}
+function rDrawNotes(pos,travel){
+  const top=CH*0.02,span=JUDGE_Y-top,{nw,nh}=rGeom();
+  for(let i=headIdx;i<notes.length;i++){const n=notes[i],dt=n.time-pos;if(dt>travel)break;if(n.hit)continue;
+    const cx=n.lane*LANE_W+LANE_W/2,y=JUDGE_Y-(dt/travel)*span,f=Math.min(1,Math.max(0,1-(dt/travel-0.72)/0.28));
+    const g=rctx.createLinearGradient(0,y-nh*3.2,0,y);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(1,'rgba(255,255,255,'+(0.08*f).toFixed(3)+')');
+    rctx.fillStyle=g;rctx.fillRect(cx-nw/2,y-nh*3.2,nw,nh*3.2);
+    rctx.fillStyle='rgba(255,255,255,'+(0.10*f).toFixed(3)+')';rctx.fillRect(cx-nw/2-2*dpr,y-nh/2-2*dpr,nw+4*dpr,nh+4*dpr);
+    rctx.fillStyle='rgba(255,255,255,'+f.toFixed(3)+')';rctx.fillRect(cx-nw/2,y-nh/2,nw,nh);
+    rctx.fillStyle='rgba(0,0,0,'+(0.55*f).toFixed(3)+')';rctx.fillRect(cx-1*dpr,y-nh/2+1*dpr,2*dpr,nh-2*dpr);}
+}
+function spawnParticles(lane){const px=lane*LANE_W+LANE_W/2;for(let i=0;i<5;i++){particles.push({x:px+(Math.random()-.5)*LANE_W*0.5,y:JUDGE_Y,vx:(Math.random()-.5)*0.8*dpr,vy:-(1.2+Math.random()*2.2)*dpr,life:1,sz:(1.5+Math.random()*1.5)*dpr});}}
+function drawParticles(){for(let i=particles.length-1;i>=0;i--){const p=particles[i];p.x+=p.vx;p.y+=p.vy;p.vy*=0.97;p.life-=0.035;if(p.life<=0){particles.splice(i,1);continue;}rctx.fillStyle='rgba(255,255,255,'+(p.life*0.8).toFixed(3)+')';rctx.fillRect(p.x,p.y,p.sz,p.sz);}
+  // hit bursts: expanding brackets
+  const now=performance.now(),{nw,nh}=rGeom();
+  for(let i=rHits.length-1;i>=0;i--){const h=rHits[i],a=(now-h.t)/320;if(a>=1){rHits.splice(i,1);continue;}
+    const cx=h.lane*LANE_W+LANE_W/2,e=1-Math.pow(1-a,3),w=nw+10*dpr+e*18*dpr,hh=nh+12*dpr+e*14*dpr;
+    rctx.lineWidth=1*dpr;rBrackets(cx-w/2,JUDGE_Y-hh/2,w,hh,6*dpr,'rgba(255,255,255,'+((1-a)*(h.p?.9:.5)).toFixed(3)+')');}
+}
+const _rJudgeBase=rJudge;
+rJudge=function(lane){const b=cPerfect+cGood;_rJudgeBase(lane);if(cPerfect+cGood>b)rHits.push({lane,t:performance.now(),p:judgeText==='PERFECT'});};
+function drawFever(){
+  if(!feverActive)return;const age=performance.now()-feverT,dur=1600;if(age>dur){feverActive=false;return;}
+  const p=age/dur,a=Math.min(1,Math.sin(p*Math.PI)*1.6);
+  rctx.save();rctx.globalAlpha=a;rctx.lineWidth=1*dpr;rctx.strokeStyle='rgba(255,255,255,.55)';rctx.strokeRect(.5*dpr,.5*dpr,CW-1*dpr,CH-1*dpr);
+  const y=CH*0.075,w=CW*0.62,h=26*dpr;rctx.fillStyle='rgba(0,0,0,.7)';rctx.fillRect(CW/2-w/2,y-h/2,w,h);rBrackets(CW/2-w/2,y-h/2,w,h,6*dpr,'rgba(255,255,255,.8)');
+  rctx.fillStyle='#fff';rctx.font='600 '+Math.round(10*dpr)+'px '+RF_MONO;rctx.fillText(spaced('SYSTEM OVERLOAD · '+combo),CW/2,y+0.5*dpr);rctx.restore();
+}
+function rDrawOverlay(){
+  const cx=CW/2,cy=CH*0.31,age=performance.now()-judgeT;
+  const isCd=/^(\d|GO)$/.test(judgeText);
+  if(isCd){if(age<780){const a=judgeText==='GO'?Math.max(0,1-age/700):1-Math.max(0,(age-500)/280),s=1+(1-Math.min(1,age/200))*0.08;
+      rctx.save();rctx.globalAlpha=a;rctx.fillStyle='#fff';rctx.font='200 '+Math.round(CH*0.075*s)+'px '+RF_SANS;rctx.fillText(judgeText,cx,cy+1*dpr);
+      rctx.font='500 '+Math.round(9*dpr)+'px '+RF_MONO;rctx.fillStyle='rgba(255,255,255,.45)';rctx.fillText(spaced(judgeText==='GO'?'SYNC START':'STANDBY'),cx,cy+CH*0.06);rctx.restore();}
+    drawFever();return;}
+  if(combo>1){rctx.fillStyle='rgba(255,255,255,.95)';rctx.font='300 '+Math.round(CH*0.05)+'px '+RF_SANS;rctx.fillText(String(combo),cx,cy-CH*0.006);
+    rctx.fillStyle='rgba(255,255,255,.42)';rctx.font='500 '+Math.round(8.5*dpr)+'px '+RF_MONO;rctx.fillText(spaced('COMBO'),cx,cy+CH*0.036);}
+  if(judgeText&&age<560){const a=age<420?1:1-(age-420)/140,y=JUDGE_Y-CH*0.11-Math.min(1,age/160)*4*dpr;
+    const col=judgeText==='MISS'?'255,110,96':judgeText==='GOOD'?'200,200,200':'255,255,255';
+    rctx.save();rctx.globalAlpha=Math.max(0,a);rctx.font='600 '+Math.round(11*dpr)+'px '+RF_MONO;rctx.fillStyle='rgb('+col+')';
+    const t=spaced(judgeText),tw=rctx.measureText(t).width;rctx.fillText(t,cx,y);
+    rctx.fillStyle='rgba('+col+',.5)';const L=14*dpr*Math.min(1,age/140);rctx.fillRect(cx-tw/2-10*dpr-L,y,L,1*dpr);rctx.fillRect(cx+tw/2+10*dpr,y,L,1*dpr);rctx.restore();}
+  drawFever();
+}
+
+/* ═════ ACHIEVEMENTS · renewal ═════ */
+const ACH_META={
+  r_clear:{g:'RHYTHM',name:'첫 발걸음',desc:'리듬게임을 처음으로 클리어'},
+  first_s:{g:'RHYTHM',name:'S 랭크',desc:'리듬게임에서 S 랭크 달성'},
+  full_combo:{g:'RHYTHM',name:'풀 콤보',desc:'MISS 없이 한 곡 클리어'},
+  all_perfect:{g:'RHYTHM',name:'올 퍼펙트',desc:'모든 노트를 PERFECT로 클리어'},
+  combo_100:{g:'RHYTHM',name:'100 콤보',desc:'한 곡에서 최대 콤보 100 이상'},
+  combo_200:{g:'RHYTHM',name:'200 콤보',desc:'한 곡에서 최대 콤보 200 이상'},
+  hard_clear:{g:'RHYTHM',name:'하드코어',desc:'HARD 이상 난이도 클리어'},
+  fever:{g:'RHYTHM',name:'시스템 오버로드',desc:'50 콤보로 오버로드 발동'},
+  quiz_ace:{g:'QUIZ',name:'퍼펙트 이어',desc:'뮤직 퀴즈 전곡 정답'},
+  streak_5:{g:'QUIZ',name:'연속 정답',desc:'퀴즈에서 5문제 연속 정답'},
+  survivor:{g:'QUIZ',name:'서바이버',desc:'서바이벌에서 10곡 이상 정답'},
+  survivor_pro:{g:'QUIZ',name:'타임 마스터',desc:'서바이벌에서 20곡 이상 정답'},
+  lyric_one:{g:'LYRICS',name:'한 줄의 직감',desc:'가사 한 줄만 보고 정답'},
+  lyric_ace:{g:'LYRICS',name:'가사 마스터',desc:'가사 퀴즈 전곡 정답'},
+  explorer:{g:'SYSTEM',name:'탐험가',desc:'세 가지 모드를 모두 플레이'}
+};
+const ACH_G={RHYTHM:'R',QUIZ:'Q',LYRICS:'L',SYSTEM:'S'};
+(function(){const cnt={};ACHS.forEach(a=>{const m=ACH_META[a.id];if(!m)return;Object.assign(a,m);cnt[m.g]=(cnt[m.g]||0)+1;a.code=ACH_G[m.g]+'-'+String(cnt[m.g]).padStart(2,'0');});})();
+let achTime={};try{achTime=JSON.parse(localStorage.getItem('arch_ach_t')||'{}')||{};}catch(e){}
+const _unlockBase=unlockAch;
+unlockAch=function(id){if(achSet.has(id))return;const def=ACHS.find(x=>x.id===id);if(!def)return;achSet.add(id);achTime[id]=Date.now();
+  try{localStorage.setItem('arch_ach',JSON.stringify([...achSet]));localStorage.setItem('arch_ach_t',JSON.stringify(achTime));}catch(e){}
+  renderBadges();toast('ACHIEVEMENT UNLOCKED · '+def.code+' '+def.name);flash();if($('screen-ach').classList.contains('on'))renderAchList();};
+function renderBadges(){const el=$('badges');if(!el)return;
+  el.innerHTML=`<span class="badge count" onclick="openAch()" title="업적 보기"><i style="width:${Math.round(achSet.size/ACHS.length*100)}%"></i><em>${achSet.size}/${ACHS.length}</em></span>`;}
+function renderAchList(){
+  const el=$('ach-list');if(!el)return;const n=achSet.size,T=ACHS.length,pct=Math.round(n/T*100);
+  const fmt=t=>{if(!t)return '';const d=new Date(t),p=x=>String(x).padStart(2,'0');return `${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())}`;};
+  let h=`<div class="ach-sum"><div class="ach-sum-n"><b>${n}</b><span>/ ${T}</span></div><div class="ach-sum-r"><div class="ach-sum-l"><span class="lbl">Completion</span><span class="lbl">${pct}%</span></div><div class="ach-bar"><i style="width:${pct}%"></i></div><div class="ach-segs">`;
+  ['RHYTHM','QUIZ','LYRICS','SYSTEM'].forEach(g=>{const a=ACHS.filter(x=>x.g===g),k=a.filter(x=>achSet.has(x.id)).length;h+=`<span><em>${g}</em>${k}/${a.length}</span>`;});
+  h+='</div></div></div>';
+  ['RHYTHM','QUIZ','LYRICS','SYSTEM'].forEach(g=>{const a=ACHS.filter(x=>x.g===g);
+    h+=`<div class="ach-gh"><span class="lbl">${g}</span><i></i><span class="lbl">${a.filter(x=>achSet.has(x.id)).length}/${a.length}</span></div><div class="ach-grid">`;
+    a.forEach(x=>{const on=achSet.has(x.id);
+      h+=`<div class="ach-card ${on?'on':''}"><div class="ach-top"><span class="ach-code">${x.code}</span><span class="ach-st">${on?'<i class="ck"></i>UNLOCKED':'<i class="lk"></i>LOCKED'}</span></div><div class="ach-nm">${esc(x.name)}</div><div class="ach-ds">${esc(x.desc)}</div>${on&&achTime[x.id]?`<div class="ach-dt">${fmt(achTime[x.id])}</div>`:''}</div>`;});
+    h+='</div>';});
+  el.innerHTML=h;$('ach-prog').textContent=n+' / '+T+' 달성';
+}
+renderBadges();
+
+/* ═════ LYRICS · numbered lines ═════ */
+function lRenderLyrics(){
+  const lines=(lShowFull?lLines:lSnippet).map(s=>String(s).trim());
+  $('l-text').innerHTML=lines.map((s,i)=>s?`<div class="ly"><span class="ly-n">${String(i+1).padStart(2,'0')}</span><span class="ly-t">${escapeHtml(s)}</span></div>`:'<div class="ly gap"></div>').join('');
+  const box=document.querySelector('#l-game .lyrics-box');if(box)box.scrollTop=0;
+}
 
 </script>
 </body>
