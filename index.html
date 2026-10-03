@@ -482,7 +482,7 @@ html,body{overflow-x:hidden;max-width:100%}
 </div>
 <div id="savePv"><div class="sp"><div class="sp-h"><span class="lbl">Image Ready</span><button class="tl" onclick="closeSavePv()">CLOSE ×</button></div><img id="spImg" alt=""><div class="sp-n" id="spName"></div><p class="hint">이미지를 길게 눌러 사진에 저장할 수도 있어요.</p><div class="btns c2"><button class="btn sm" id="spShare" onclick="spShare()">공유 · 저장</button><button class="btn sm pri" onclick="spDownload()">다운로드</button></div></div></div>
 <div id="toast"></div><div id="flash"></div>
-<audio id="q-audio" preload="none"></audio>
+<audio id="q-audio" preload="auto" playsinline></audio>
 <canvas id="cap-canvas" width="960" height="1240" style="display:none;"></canvas>
 
 <div id="share-modal" class="mdl">
@@ -1827,12 +1827,11 @@ async function rStart(){
   rThumbImg.src=thumbUrl(song);
   show('r-load');$('r-load-txt').textContent='LOADING AUDIO';
   try{
-    if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();
-    await actx.resume();
+    unlockAudio();
+    try{await Promise.race([actx.resume(),new Promise(r=>setTimeout(r,1500))]);}catch(e){}
     if(rCache&&rCache.key===song.thumb){audioBuf=rCache.buf;rSeg=rCache.seg;}
     else{
-      const res=await fetch(audioUrl(song));if(!res.ok)throw new Error('HTTP '+res.status);
-      const ab=await res.arrayBuffer();$('r-load-txt').textContent='ANALYZING WAVEFORM';
+      const ab=await fetchAudio(audioUrl(song),p=>{$('r-load-txt').textContent='LOADING AUDIO · '+p+'%';});$('r-load-txt').textContent='ANALYZING WAVEFORM';
       const full=await new Promise((ok,no)=>{const p=actx.decodeAudioData(ab,ok,no);if(p&&p.then)p.then(ok,no);});
       $('r-load-txt').textContent='CUTTING GAME SIZE';await new Promise(r=>setTimeout(r,30));
       rSeg=pickSegment(full);audioBuf=cutBuffer(full,rSeg);rCache={key:song.thumb,buf:audioBuf,seg:rSeg};
@@ -1843,7 +1842,7 @@ async function rStart(){
     rLastNote=notes.length?notes[notes.length-1].time:0;
     if(!notes.length){notify('NO BEATS DETECTED');show('r-select');return;}
     rCountdown(song);
-  }catch(err){console.error(err);notify('LOAD FAILED · '+(err&&err.message||'audio'));$('r-load-txt').textContent='LOAD FAILED';setTimeout(()=>show('r-select'),1800);}
+  }catch(err){console.error(err);const m=audioErrMsg(err);notify('LOAD FAILED · '+m);$('r-load-txt').textContent='LOAD FAILED · '+m;setTimeout(()=>{if($('r-load').classList.contains('on'))show('r-select');},3200);}
   finally{rLoading=false;$('r-start').disabled=rSelected===null;}
 }
 function rStopAll(){rRunning=false;rActive=false;rPaused=false;analyser=null;clearInterval(rCdInt);rCdInt=null;cancelAnimationFrame(rRaf);const po=$('r-pause');if(po)po.classList.remove('on');try{if(source)source.stop();}catch(e){}}
@@ -1927,7 +1926,7 @@ function captureScreen(){
   setTimeout(()=>{html2canvas(document.body,{backgroundColor:'#000',useCORS:true,logging:false,scale:Math.max(2,devicePixelRatio||1),width:innerWidth,height:innerHeight,windowWidth:innerWidth,windowHeight:innerHeight,x:0,y:0,scrollX:0,scrollY:0,
     ignoreElements:el=>['cursor','cur-dot','toast','flash','boot','savePv','share-modal','keycfg-modal','sync-modal','cap-canvas'].includes(el.id)||(location.protocol==='file:'&&el.tagName==='IMG'&&!/^data:/.test(el.src)),
     onclone:d=>{const dc=[...d.querySelectorAll('canvas')];src.forEach((c,i)=>{const t=dc[i];if(!t||!c.width||c.id==='cap-canvas')return;try{t.width=c.width;t.height=c.height;t.getContext('2d').drawImage(c,0,0);}catch(e){}});
-      d.body.classList.add('cap');const a=d.getElementById('app');if(a)a.scrollTop=st;}})
+      d.body.classList.add('cap');const ns=d.createElement('style');ns.textContent='*{animation:none!important;transition:none!important}';d.head.appendChild(ns);const a=d.getElementById('app');if(a)a.scrollTop=st;}})
   .then(c=>{const dt=new Date(),p=n=>String(n).padStart(2,'0');download(c.toDataURL('image/png'),`ARCH_CAPTURE_${dt.getFullYear()}${p(dt.getMonth()+1)}${p(dt.getDate())}_${p(dt.getHours())}${p(dt.getMinutes())}${p(dt.getSeconds())}.png`);flash();toast('CAPTURE SAVED');})
   .catch(e=>{console.error(e);toast('CAPTURE FAILED');}).finally(()=>{CAPTURING=false;});},300);
 }
@@ -1970,6 +1969,54 @@ function spDownload(){if(!PV)return;const a=document.createElement('a');a.href=P
 $('savePv').addEventListener('click',e=>{if(e.target===$('savePv'))closeSavePv();});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('savePv').classList.contains('on'))closeSavePv();});
 
+
+/* ===== AUDIO ROBUSTNESS ===== */
+// iOS: route Web Audio through the media channel so the silent switch does not mute it
+try{if(navigator.audioSession)navigator.audioSession.type='playback';}catch(e){}
+function unlockAudio(){
+  if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();
+  try{actx.resume();}catch(e){}
+  try{const b=actx.createBuffer(1,1,22050),s=actx.createBufferSource();s.buffer=b;s.connect(actx.destination);s.start(0);}catch(e){}
+}
+['touchend','pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,function u(){try{unlockAudio();}catch(e){}document.removeEventListener(ev,u,true);},true));
+async function fetchAudio(url,onProg){
+  const ctl=window.AbortController?new AbortController():null;let to=setTimeout(()=>ctl&&ctl.abort(),45000);
+  let res;
+  try{res=await fetch(url,{mode:'cors',cache:'force-cache',signal:ctl?ctl.signal:undefined});}
+  catch(e){clearTimeout(to);const er=new Error(e&&e.name==='AbortError'?'TIMEOUT':'NETWORK');er.code=er.message;throw er;}
+  if(!res.ok){clearTimeout(to);const er=new Error('HTTP '+res.status);er.code='HTTP';er.status=res.status;throw er;}
+  const len=+res.headers.get('content-length')||0;
+  if(!res.body||!res.body.getReader||!len){const ab=await res.arrayBuffer();clearTimeout(to);return ab;}
+  const rd=res.body.getReader(),out=new Uint8Array(len);let got=0;
+  for(;;){const {done,value}=await rd.read();if(done)break;if(got+value.length>out.length)break;out.set(value,got);got+=value.length;onProg&&onProg(Math.round(got/len*100));}
+  clearTimeout(to);return out.buffer.slice(0,got);
+}
+function audioErrMsg(e){
+  if(!e)return '알 수 없는 오류';
+  if(e.code==='NETWORK')return '음원 서버에 연결할 수 없어요';
+  if(e.code==='TIMEOUT')return '음원 응답 시간 초과';
+  if(e.code==='HTTP')return e.status===404||e.status===400?'음원 파일을 찾을 수 없어요':'음원 서버 오류 '+e.status;
+  if(e.name==='EncodingError'||/decode/i.test(e.message||''))return '음원 디코딩 실패';
+  return e.message||'오류';
+}
+// quiz: never leave the play button stuck while metadata is pending
+let qMetaTimer=null;
+qaudio.addEventListener('loadstart',()=>{clearTimeout(qMetaTimer);qMetaTimer=setTimeout(()=>{if(!qDurReady&&qSong){$('q-play').disabled=false;$('q-clipmeta').textContent='CLIP '+qClip+'s · 재생을 눌러 들어 보세요';}},2500);});
+qaudio.addEventListener('error',()=>{clearTimeout(qMetaTimer);const c=qaudio.error&&qaudio.error.code;if(qSong)$('q-clipmeta').textContent='음원을 불러올 수 없어요 · 서버 상태 확인'+(c?' (E'+c+')':'');});
+const _qPlay=qPlay;
+qPlay=function(randomize){
+  if(!qSong)return;
+  try{unlockAudio();}catch(e){}
+  if(!qDurReady){
+    // metadata not in yet (iOS/slow network): start playback from the gesture, seek once it arrives
+    qaudio.play().then(()=>{}).catch(()=>{$('q-clipmeta').textContent='재생할 수 없어요 · 다시 눌러 주세요';});
+    $('q-clipmeta').textContent='불러오는 중';
+    const go=()=>{qaudio.removeEventListener('loadedmetadata',go);qaudio.pause();_qPlay(false);};
+    if(qaudio.readyState>=1)go();else qaudio.addEventListener('loadedmetadata',go);
+    return;
+  }
+  _qPlay(randomize);
+};
 
 </script>
 </body>
